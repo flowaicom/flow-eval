@@ -3,7 +3,7 @@ import os
 import warnings
 from typing import Any
 
-from flow_judge.models.common import (
+from flow_eval.models.common import (
     AsyncBaseFlowJudgeModel,
     BaseFlowJudgeModel,
     ModelConfig,
@@ -132,7 +132,7 @@ class Vllm(BaseFlowJudgeModel, AsyncBaseFlowJudgeModel):
                 message=(
                     "The 'vllm' package is not installed. "
                     "Please install it by adding 'vllm' to your extras:\n"
-                    "pip install flow-judge[vllm]"
+                    "pip install flow-eval[vllm]"
                 ),
             )
 

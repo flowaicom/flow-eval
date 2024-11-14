@@ -3,6 +3,7 @@ from datetime import datetime
 from pydantic import BaseModel, Field, field_validator
 
 
+# FIXME: This should be more generic, not flow judge specific
 class FlowJudgeError(BaseModel):
     """Represents an error encountered during the Flow Judge evaluation process.
 

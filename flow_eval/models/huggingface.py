@@ -3,7 +3,7 @@ import os
 import warnings
 from typing import Any
 
-from flow_judge.models.common import BaseFlowJudgeModel, GenerationParams, ModelConfig, ModelType
+from flow_eval.models.common import BaseFlowJudgeModel, GenerationParams, ModelConfig, ModelType
 
 try:
     import torch
@@ -135,7 +135,7 @@ class Hf(BaseFlowJudgeModel):
                 status_code=2,
                 message=f"An error occurred while initializing the Hugging Face model: {str(e)}\n"
                 "Please make sure you have installed all required dependencies by adding 'hf' "
-                "to your extras:\npip install flow-judge[hf]",
+                "to your extras:\npip install flow-eval[hf]",
             ) from e
 
     def _determine_batch_size(self, prompts: list[str]) -> int:

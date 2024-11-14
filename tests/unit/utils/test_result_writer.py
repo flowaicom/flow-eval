@@ -6,8 +6,8 @@ from typing import Any
 
 import pytest
 
-from flow_judge.eval_data_types import EvalInput, EvalOutput
-from flow_judge.utils.result_writer import (
+from flow_eval.eval_data_types import EvalInput, EvalOutput
+from flow_eval.utils.result_writer import (
     _format_name,
     _prepare_file_paths,
     _prepare_metadata,
@@ -67,7 +67,7 @@ def mock_datetime(monkeypatch: pytest.MonkeyPatch) -> None:
         def now(tz: timezone | None = None) -> datetime:
             return datetime(2023, 1, 1, tzinfo=timezone.utc)
 
-    monkeypatch.setattr("flow_judge.utils.result_writer.datetime", MockDatetime)
+    monkeypatch.setattr("flow_eval.utils.result_writer.datetime", MockDatetime)
 
 
 def test_write_results_to_disk(

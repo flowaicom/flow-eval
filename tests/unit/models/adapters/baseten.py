@@ -7,7 +7,7 @@ import pytest
 from openai import OpenAIError
 from pytest import MonkeyPatch
 
-from flow_judge.models.adapters.baseten.adapter import AsyncBasetenAPIAdapter, BasetenAPIAdapter
+from flow_eval.models.adapters.baseten.adapter import AsyncBasetenAPIAdapter, BasetenAPIAdapter
 
 
 @pytest.fixture
@@ -67,7 +67,7 @@ def test_baseten_api_adapter_init_missing_api_key() -> None:
         BasetenAPIAdapter("test_model_id")
 
 
-@patch("flow_judge.models.adapters.baseten.adapter.OpenAI")
+@patch("flow_eval.models.adapters.baseten.adapter.OpenAI")
 def test_make_request(mock_openai: Mock, baseten_api_adapter: BasetenAPIAdapter) -> None:
     """Test case to ensure the _make_request method works as expected under different scenarios.
 
@@ -90,7 +90,7 @@ def test_make_request(mock_openai: Mock, baseten_api_adapter: BasetenAPIAdapter)
     assert result is None
 
 
-@patch("flow_judge.models.adapters.baseten.adapter.BasetenAPIAdapter._make_request")
+@patch("flow_eval.models.adapters.baseten.adapter.BasetenAPIAdapter._make_request")
 def test_fetch_response(mock_make_request: Mock, baseten_api_adapter: BasetenAPIAdapter) -> None:
     """Test case to ensure the _fetch_response method works as expected under different scenarios.
 
@@ -115,7 +115,7 @@ def test_fetch_response(mock_make_request: Mock, baseten_api_adapter: BasetenAPI
     assert result == ""
 
 
-@patch("flow_judge.models.adapters.baseten.adapter.BasetenAPIAdapter._make_request")
+@patch("flow_eval.models.adapters.baseten.adapter.BasetenAPIAdapter._make_request")
 def test_fetch_batched_response(
     mock_make_request: Mock, baseten_api_adapter: BasetenAPIAdapter
 ) -> None:
@@ -145,7 +145,7 @@ def test_fetch_batched_response(
     assert result == [""]
 
 
-@patch("flow_judge.models.adapters.baseten.webhook.ensure_baseten_webhook_secret")
+@patch("flow_eval.models.adapters.baseten.webhook.ensure_baseten_webhook_secret")
 def test_async_baseten_api_adapter_init(
     mock_ensure_webhook_secret: Mock, async_baseten_api_adapter: AsyncBasetenAPIAdapter
 ) -> None:
@@ -229,8 +229,8 @@ def test_async_make_request(
     assert result is None
 
 
-@patch("flow_judge.models.adapters.baseten.adapter.AsyncBasetenAPIAdapter._make_request")
-@patch("flow_judge.models.adapters.baseten.adapter.AsyncBasetenAPIAdapter._fetch_stream")
+@patch("flow_eval.models.adapters.baseten.adapter.AsyncBasetenAPIAdapter._make_request")
+@patch("flow_eval.models.adapters.baseten.adapter.AsyncBasetenAPIAdapter._fetch_stream")
 def test_async_fetch_response(
     mock_fetch_stream: Mock,
     mock_make_request: Mock,
@@ -256,8 +256,8 @@ def test_async_fetch_response(
     assert result == "Hello, world!"
 
 
-@patch("flow_judge.models.adapters.baseten.adapter.AsyncBasetenAPIAdapter._make_request")
-@patch("flow_judge.models.adapters.baseten.adapter.AsyncBasetenAPIAdapter._fetch_stream")
+@patch("flow_eval.models.adapters.baseten.adapter.AsyncBasetenAPIAdapter._make_request")
+@patch("flow_eval.models.adapters.baseten.adapter.AsyncBasetenAPIAdapter._fetch_stream")
 def test_async_fetch_batched_response(
     mock_fetch_stream: Mock,
     mock_make_request: Mock,

@@ -3,7 +3,7 @@ from unittest.mock import mock_open, patch
 import pytest
 import yaml
 
-from flow_judge.models.adapters.baseten.gpu import (
+from flow_eval.models.adapters.baseten.gpu import (
     _get_gpu_key,
     _has_gpu_key,
     _update_config,
@@ -140,6 +140,6 @@ def test_ensure_gpu(monkeypatch, mock_env_value: str | None, mock_input_value, e
     if mock_env_value is not None:
         monkeypatch.setenv("BASETEN_GPU", mock_env_value)
     with patch("builtins.input", side_effect=[mock_input_value]):
-        with patch("flow_judge.models.adapters.baseten.gpu._update_config") as mock_update_config:
+        with patch("flow_eval.models.adapters.baseten.gpu._update_config") as mock_update_config:
             mock_update_config.return_value = True
             assert ensure_gpu() == expected

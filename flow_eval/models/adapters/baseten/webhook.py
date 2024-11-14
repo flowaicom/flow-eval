@@ -7,8 +7,8 @@ from .util import is_interactive
 
 logger: logging.Logger = logging.getLogger(__name__)
 
-_stored_secret_path: str = "~/.config/flow-judge/baseten_webhook_secret"
-_stored_skip_file: str = "~/.config/flow-judge/baseten_whsec_skipped"
+_stored_secret_path: str = "~/.config/flow-eval/baseten_webhook_secret"
+_stored_skip_file: str = "~/.config/flow-eval/baseten_whsec_skipped"
 
 
 def _is_valid_secret(secret: str) -> bool:
@@ -76,7 +76,7 @@ def _handle_skip() -> bool:
     if os.environ.get("BASETEN_SKIP_WEBHOOK_SECRET"):
         logger.info(
             "User requested to skip the webhook secret prompt, skipping and saving skip file. "
-            "Remove ~/.config/flow-judge/baseten_whsec_skipped to restore the prompt."
+            "Remove ~/.config/flow-eval/baseten_whsec_skipped to restore the prompt."
         )
         _save_skip_file()
         return True
@@ -84,7 +84,7 @@ def _handle_skip() -> bool:
     if os.path.exists(os.path.expanduser(_stored_skip_file)):
         logger.info(
             "Webhook secret not required and user skipped it before, skipping. "
-            "Remove ~/.config/flow-judge/baseten_whsec_skipped to restore the prompt."
+            "Remove ~/.config/flow-eval/baseten_whsec_skipped to restore the prompt."
         )
         return True
 
@@ -169,7 +169,7 @@ def _print_general_prompt(optional: bool) -> None:
         f"It will be stored in {_stored_secret_path} for later use.\n"
         "For your convenience, Baseten responses are forwarded to you using Flow AI proxy.\n"
         "Explore what this means and the alternatives here: "
-        "https://github.com/flowaicom/flow-judge/\n"
+        "https://github.com/flowaicom/flow-eval/\n"
     )
     if optional:
         print("\033[1mOptional. This is  only required if you plan async execution.\033[0m")

@@ -10,9 +10,9 @@ import pytest
 from llama_index.core import VectorStoreIndex
 from llama_index.core.llama_dataset import download_llama_dataset
 
-from flow_judge.integrations.llama_index import LlamaIndexFlowJudge
-from flow_judge.metrics import CustomMetric, RubricItem
-from flow_judge.models import Vllm
+from flow_eval.integrations.llama_index import LlamaIndexFlowJudge
+from flow_eval.metrics import CustomMetric, RubricItem
+from flow_eval.models import Vllm
 
 pytest_plugins = ("pytest_asyncio",)
 
@@ -27,7 +27,7 @@ def test_cache_dir():
     :yield: Path object pointing to the temporary directory
     :rtype: pathlib.Path
     """
-    with tempfile.TemporaryDirectory(prefix="flow-judge-test-") as tmpdir:
+    with tempfile.TemporaryDirectory(prefix="flow-eval-test-") as tmpdir:
         temp_path = Path(tmpdir)
         logging.info(f"Created temporary test cache directory: {temp_path}")
         yield temp_path
@@ -231,10 +231,10 @@ async def test_correctness_evaluation(
         quantized=True,
         download_dir=str(test_cache_dir),
     )
-    flow_judge_evaluator = LlamaIndexFlowJudge(
+    flow_eval_evaluator = LlamaIndexFlowJudge(
         model=model, metric=correctness_metric, save_results=True
     )
-    result = await flow_judge_evaluator.aevaluate(
+    result = await flow_eval_evaluator.aevaluate(
         query=query, reference=reference, response=response
     )
     if result:
@@ -286,7 +286,7 @@ async def test_batch_evaluation(correctness_metric, query, reference, response, 
     """Performs a batch evaluation of queries using LlamaIndexFlowJudge and analyzes results."""
     os.environ["HF_HOME"] = str(test_cache_dir)
     model = None
-    flow_judge_correctness = None
+    flow_eval_correctness = None
 
     try:
         logging.info("Starting test_batch_evaluation")
@@ -301,7 +301,7 @@ async def test_batch_evaluation(correctness_metric, query, reference, response, 
         logging.info("Vllm model initialized")
 
         logging.info("Initializing LlamaIndexFlowJudge")
-        flow_judge_correctness = LlamaIndexFlowJudge(
+        flow_eval_correctness = LlamaIndexFlowJudge(
             model=model,
             metric=correctness_metric,
             output_dir=str(test_cache_dir),
@@ -330,7 +330,7 @@ async def test_batch_evaluation(correctness_metric, query, reference, response, 
         responses = [response] * 3
 
         logging.info(f"Starting evaluation of {len(queries)} queries")
-        eval_results = await flow_judge_correctness.aevaluate_batch(
+        eval_results = await flow_eval_correctness.aevaluate_batch(
             queries=queries, responses=responses, references=references, save_results=True
         )
         logging.info(f"Finished evaluation, got {len(eval_results)} results")
@@ -397,8 +397,8 @@ async def test_batch_evaluation(correctness_metric, query, reference, response, 
         if model:
             await model.aclose()
 
-        if flow_judge_correctness and hasattr(flow_judge_correctness, "aclose"):
-            await flow_judge_correctness.aclose()
+        if flow_eval_correctness and hasattr(flow_eval_correctness, "aclose"):
+            await flow_eval_correctness.aclose()
 
         # Allow time for background tasks to complete
         await asyncio.sleep(1)

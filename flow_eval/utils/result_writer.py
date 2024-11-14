@@ -8,8 +8,8 @@ from typing import Any
 
 from pydantic import BaseModel
 
-import flow_judge
-from flow_judge.eval_data_types import EvalInput, EvalOutput
+import flow_eval
+from flow_eval.eval_data_types import EvalInput, EvalOutput
 
 logger = logging.getLogger(__name__)
 
@@ -183,7 +183,7 @@ def _prepare_metadata(model_metadata: dict[str, Any], timestamp: str) -> dict[st
         - Does not deep copy the input model_metadata.
     """
     metadata = {
-        "library_version": f"{flow_judge.__version__}",
+        "library_version": f"{flow_eval.__version__}",
         "timestamp": timestamp,
         **model_metadata,
     }

@@ -55,7 +55,7 @@ H100 -> Flow-Judge-v0.1-FP8
 ## Sync execution
 
 When running Flow Judge eval, use `Baseten` class as a model
-(see [Quickstart](https://github.com/flowaicom/flow-judge?tab=readme-ov-file#quick-start)):
+(see [Quickstart](https://github.com/flowaicom/flow-eval?tab=readme-ov-file#quick-start)):
 
 ```python
 model=Baseten()
@@ -100,7 +100,7 @@ unless provided earlier. The key is used to validate and deploy the model to you
 Additionally, when using asynchronous execution, we verify the signature of the received webhooks payloads, as
 recommended by Baseten (see [official documentation](https://docs.baseten.co/invoke/async-secure)).
 Because of that, during first run you will be asked to provide the webhook secret. It will be stored
-in `~/.config/flow-judge/baseten_webhook_secret` and never leaves your device.
+in `~/.config/flow-eval/baseten_webhook_secret` and never leaves your device.
 
 ### Using proxy locally
 

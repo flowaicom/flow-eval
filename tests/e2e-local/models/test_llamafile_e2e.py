@@ -5,7 +5,7 @@ from pathlib import Path
 
 import pytest
 
-from flow_judge.models.llamafile import Llamafile
+from flow_eval.models.llamafile import Llamafile
 
 # Set up logging with more detail
 logging.basicConfig(level=logging.DEBUG, format="%(asctime)s - %(levelname)s - %(message)s")
@@ -34,7 +34,7 @@ def test_cache_dir():
     :yield: Path object pointing to the temporary directory
     :rtype: pathlib.Path
     """
-    with tempfile.TemporaryDirectory(prefix="flow-judge-test-") as tmpdir:
+    with tempfile.TemporaryDirectory(prefix="flow-eval-test-") as tmpdir:
         temp_path = Path(tmpdir)
         logger.info(f"Created temporary test cache directory: {temp_path}")
         yield temp_path

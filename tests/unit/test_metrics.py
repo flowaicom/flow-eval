@@ -1,4 +1,4 @@
-from flow_judge.metrics import RESPONSE_CORRECTNESS_BINARY, CustomMetric, RubricItem
+from flow_eval.metrics import RESPONSE_CORRECTNESS_BINARY, CustomMetric, RubricItem
 
 
 def test_response_correctness_binary():

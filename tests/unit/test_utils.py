@@ -1,15 +1,15 @@
 import pytest
 
-from flow_judge.eval_data_types import EvalInput
-from flow_judge.metrics import CustomMetric, RubricItem
-from flow_judge.utils.prompt_formatter import (
+from flow_eval.eval_data_types import EvalInput
+from flow_eval.metrics import CustomMetric, RubricItem
+from flow_eval.utils.prompt_formatter import (
     USER_PROMPT_NO_INPUTS_TEMPLATE,
     USER_PROMPT_TEMPLATE,
     format_rubric,
     format_user_prompt,
     format_vars,
 )
-from flow_judge.utils.validators import validate_eval_input
+from flow_eval.utils.validators import validate_eval_input
 
 
 def test_format_vars():

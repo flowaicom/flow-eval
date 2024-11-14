@@ -11,9 +11,9 @@ from llama_index.core.evaluation import BatchEvalRunner
 from llama_index.core.llama_dataset import download_llama_dataset
 from pydantic import BaseModel
 
-from flow_judge import Baseten
-from flow_judge.integrations.llama_index import LlamaIndexFlowJudge
-from flow_judge.metrics import CustomMetric, RubricItem
+from flow_eval import Baseten
+from flow_eval.integrations.llama_index import LlamaIndexFlowJudge
+from flow_eval.metrics import CustomMetric, RubricItem
 
 pytest_plugins = ("pytest_asyncio",)
 
@@ -54,7 +54,7 @@ def test_cache_dir() -> Path:
     """
     import tempfile
 
-    with tempfile.TemporaryDirectory(prefix="flow-judge-baseten-test-") as tmpdir:
+    with tempfile.TemporaryDirectory(prefix="flow-eval-baseten-test-") as tmpdir:
         temp_path = Path(tmpdir)
         logger.info(f"Created temporary test cache directory: {temp_path}")
         yield temp_path
@@ -194,7 +194,7 @@ async def test_baseten_correctness_evaluation(
         exec_async=True,
         webhook_proxy_url=test_config.webhook_url,
     )
-    flow_judge_evaluator = LlamaIndexFlowJudge(model=model, metric=correctness_metric)
+    flow_eval_evaluator = LlamaIndexFlowJudge(model=model, metric=correctness_metric)
 
     # Download and prepare the dataset
     rag_dataset, documents = download_llama_dataset(
@@ -208,7 +208,7 @@ async def test_baseten_correctness_evaluation(
     # Generate response using Baseten model
     response = await model._async_generate(query)
 
-    result = await flow_judge_evaluator.aevaluate(
+    result = await flow_eval_evaluator.aevaluate(
         query=query, reference=reference, response=response
     )
 
@@ -244,7 +244,7 @@ async def test_baseten_batch_evaluation(
     )
     logger.info("Starting test_baseten_batch_evaluation")
 
-    flow_judge_correctness = LlamaIndexFlowJudge(model=model, metric=correctness_metric)
+    flow_eval_correctness = LlamaIndexFlowJudge(model=model, metric=correctness_metric)
 
     # Download and prepare the dataset
     rag_dataset, documents = download_llama_dataset(
@@ -262,7 +262,7 @@ async def test_baseten_batch_evaluation(
 
     logger.info(f"Evaluating {len(queries)} queries")
 
-    evaluators = {"correctness": flow_judge_correctness}
+    evaluators = {"correctness": flow_eval_correctness}
 
     eval_results = await batch_eval_runner(
         evaluators=evaluators,

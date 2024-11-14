@@ -1,5 +1,5 @@
-from flow_judge.metrics.metric import CustomMetric, Metric, RubricItem
-from flow_judge.metrics.presets import (
+from flow_eval.metrics.metric import CustomMetric, Metric, RubricItem
+from flow_eval.metrics.presets import (
     RESPONSE_CORRECTNESS_3POINT,
     RESPONSE_CORRECTNESS_5POINT,
     RESPONSE_CORRECTNESS_BINARY,

@@ -125,6 +125,27 @@ class VllmGenerationParams(GenerationParams):
         del self.do_sample
 
 
+class OpenAIGenerationParams(GenerationParams):
+    """Configuration parameters specific to OpenAI API text generation."""
+
+    frequency_penalty: float | None = Field(default=0, description="Penalty for token frequency")
+    presence_penalty: float | None = Field(default=0, description="Penalty for token presence")
+    max_completion_tokens: int | None = Field(
+        default=2048, description="Maximum tokens to generate"
+    )
+    n: int = Field(default=1, description="Number of completions to generate")
+    stop: list[str] | str | None = Field(default=None, description="Stopping sequences")
+    response_format: dict | None = Field(default=None, description="Output format specification")
+    seed: int | None = Field(default=None, description="Seed for deterministic generation")
+
+    def __init__(self, **data):
+        """Initialize OpenAIGenerationParams with given data."""
+        super().__init__(**data)
+        self.max_completion_tokens = self.max_new_tokens
+        del self.max_new_tokens
+        del self.do_sample
+
+
 class ModelType(Enum):
     """Enum for the type of model."""
 
@@ -134,6 +155,8 @@ class ModelType(Enum):
     LLAMAFILE = "llamafile"
     BASETEN_VLLM = "baseten_vllm"
     BASETEN_VLLM_ASYNC = "baseten_vllm_async"
+    OPENAI = "openai"
+    OPENAI_ASYNC = "openai_async"
 
 
 class Engine(Enum):

@@ -1,5 +1,5 @@
-from flow_judge.eval_data_types import EvalInput
-from flow_judge.metrics.metric import CustomMetric, Metric
+from flow_eval.eval_data_types import EvalInput
+from flow_eval.metrics.metric import CustomMetric, Metric
 
 
 def validate_eval_input(eval_input: EvalInput, metric: Metric | CustomMetric):

@@ -14,7 +14,7 @@ from typing import Any
 import requests
 from tqdm import tqdm
 
-from flow_judge.models.common import (
+from flow_eval.models.common import (
     AsyncBaseFlowJudgeModel,
     BaseFlowJudgeModel,
     GenerationParams,
@@ -48,8 +48,8 @@ class LlamafileConfig(ModelConfig):
     def __init__(
         self,
         generation_params: GenerationParams,
-        model_filename: str = "flow-judge.llamafile",
-        cache_dir: str = os.path.expanduser("~/.cache/flow-judge"),
+        model_filename: str = "flow-eval.llamafile",
+        cache_dir: str = os.path.expanduser("~/.cache/flow-eval"),
         port: int = 8085,
         disable_kv_offload: bool = False,
         quantized_kv: bool = True,
@@ -131,7 +131,7 @@ class Llamafile(BaseFlowJudgeModel, AsyncBaseFlowJudgeModel):
     def __init__(
         self,
         generation_params: dict[str, Any] | None = None,
-        cache_dir: str = os.path.expanduser("~/.cache/flow-judge"),
+        cache_dir: str = os.path.expanduser("~/.cache/flow-eval"),
         port: int | None = None,
         disable_kv_offload: bool = False,
         quantized_kv: bool = True,
@@ -180,7 +180,7 @@ class Llamafile(BaseFlowJudgeModel, AsyncBaseFlowJudgeModel):
                 status_code=1,
                 message="The required Llamafile packages are not installed. "
                 "Please install them by adding 'llamafile' to your extras:\n"
-                "pip install flow-judge[llamafile]",
+                "pip install flow-eval[llamafile]",
             )
 
         # Allow internal override of model_id for debugging/development
@@ -206,7 +206,7 @@ class Llamafile(BaseFlowJudgeModel, AsyncBaseFlowJudgeModel):
 
         config = LlamafileConfig(
             generation_params=generation_params,
-            model_filename="flow-judge.llamafile",
+            model_filename="flow-eval.llamafile",
             cache_dir=cache_dir,
             port=port,
             disable_kv_offload=disable_kv_offload,
@@ -265,7 +265,7 @@ class Llamafile(BaseFlowJudgeModel, AsyncBaseFlowJudgeModel):
                 message=f"An error occurred while initializing the Llamafile model: {str(e)}\n"
                 "Please make sure you have installed all required dependencies"
                 " by adding 'llamafile' to your extras:\n"
-                "pip install flow-judge[llamafile]",
+                "pip install flow-eval[llamafile]",
             ) from e
 
         self._instances.add(weakref.ref(self, self._finalizer))

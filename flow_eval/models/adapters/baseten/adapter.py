@@ -17,22 +17,22 @@ from tenacity import (
     wait_exponential,
 )
 
-from flow_judge.models.adapters.base import AsyncBaseAPIAdapter, BaseAPIAdapter
-from flow_judge.models.adapters.baseten.data_io import BatchResult, Message
-from flow_judge.models.adapters.baseten.errors import (
+from flow_eval.models.adapters.base import AsyncBaseAPIAdapter, BaseAPIAdapter
+from flow_eval.models.adapters.baseten.data_io import BatchResult, Message
+from flow_eval.models.adapters.baseten.errors import (
     BasetenAPIError,
     BasetenRateLimitError,
     BasetenRequestError,
     BasetenResponseError,
     FlowJudgeError,
 )
-from flow_judge.models.adapters.baseten.management import (
+from flow_eval.models.adapters.baseten.management import (
     get_production_deployment_status,
     set_scale_down_delay,
     wake_deployment,
 )
-from flow_judge.models.adapters.baseten.token_bucket import TokenBucket
-from flow_judge.models.adapters.baseten.validation import validate_baseten_signature
+from flow_eval.models.adapters.baseten.token_bucket import TokenBucket
+from flow_eval.models.adapters.baseten.validation import validate_baseten_signature
 
 logger = structlog.get_logger(__name__)
 

@@ -13,6 +13,7 @@ class EvalInput(BaseModel):
     output: dict[str, str]
 
 
+# TODO - different parsers
 class EvalOutput(BaseModel):
     """Output model for evaluation results."""
 

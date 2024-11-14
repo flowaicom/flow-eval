@@ -1,7 +1,7 @@
 # `flow-judge`
 
 <p align="center">
-  <img src="img/flow_judge_banner.png" alt="Flow Judge Banner">
+  <img src="img/flow_eval_banner.png" alt="Flow Judge Banner">
 </p>
 
 <p align="center" style="font-family: 'Courier New', Courier, monospace;">
@@ -9,7 +9,7 @@
     <a href="https://www.flow-ai.com/judge">Technical Report</a> |
     <a href="https://huggingface.co/collections/flowaicom/flow-judge-v01-66e6af5fc3b3a128bde07dec">Model Weights</a> |
     <a href="https://huggingface.co/spaces/flowaicom/Flow-Judge-v0.1">HuggingFace Space</a> |
-    <a href="https://github.com/flowaicom/lm-evaluation-harness/tree/Flow-Judge-v0.1_evals/lm_eval/tasks/flow_judge_evals">Evaluation Code</a> |
+    <a href="https://github.com/flowaicom/lm-evaluation-harness/tree/Flow-Judge-v0.1_evals/lm_eval/tasks/flow_eval_evals">Evaluation Code</a> |
     <a href="https://github.com/flowaicom/flow-judge/tree/main/examples">Tutorials</a>
   </strong>
 </p>
@@ -77,8 +77,8 @@ Extras available:
 Here's a simple example to get you started:
 
 ```python
-from flow_judge import Vllm, Llamafile, Hf, EvalInput, FlowJudge
-from flow_judge.metrics import RESPONSE_FAITHFULNESS_5POINT
+from flow_eval import Vllm, Llamafile, Hf, EvalInput, FlowJudge
+from flow_eval.metrics import RESPONSE_FAITHFULNESS_5POINT
 from IPython.display import Markdown, display
 
 # If you are running on an Ampere GPU or newer, create a model using VLLM
@@ -133,7 +133,7 @@ The library supports multiple inference backends to accommodate different hardwa
    - Requires CUDA-compatible GPU
 
    ```python
-   from flow_judge import Vllm
+   from flow_eval import Vllm
 
    model = Vllm()
    ```
@@ -145,14 +145,14 @@ The library supports multiple inference backends to accommodate different hardwa
 
     If you are running on an Ampere GPU or newer:
    ```python
-   from flow_judge import Hf
+   from flow_eval import Hf
 
    model = Hf()
    ```
 
    If you are not running on an Ampere GPU or newer, disable flash attention:
    ```python
-   from flow_judge import Hf
+   from flow_eval import Hf
 
    model = Hf(flash_attn=False)
    ```
@@ -163,7 +163,7 @@ The library supports multiple inference backends to accommodate different hardwa
    - Self-contained, easy to deploy option
 
    ```python
-   from flow_judge import Llamafile
+   from flow_eval import Llamafile
 
    model = Llamafile()
    ```
@@ -174,11 +174,11 @@ The library supports multiple inference backends to accommodate different hardwa
     - Improved concurrency patterns for larger workloads.
 
   ```python
-  from flow_judge import Baseten
+  from flow_eval import Baseten
 
   model = Baseten()
   ```
-  For detailed information on using Baseten, visit the [Baseten readme](https://github.com/flowaicom/flow-judge/blob/feat/baseten-integration/flow_judge/models/adapters/baseten/README.md).
+  For detailed information on using Baseten, visit the [Baseten readme](https://github.com/flowaicom/flow-judge/blob/feat/baseten-integration/flow_eval/models/adapters/baseten/README.md).
 
 Choose the inference backend that best matches your hardware and performance requirements. The library provides a unified interface for all these options, making it easy to switch between them as needed.
 
@@ -192,7 +192,7 @@ Choose the inference backend that best matches your hardware and performance req
 For convenience, `flow-judge` library comes with pre-defined metrics such as `RESPONSE_CORRECTNESS` or `RESPONSE_FAITHFULNESS`. You can check the full list by running:
 
 ```python
-from flow_judge.metrics import list_all_metrics
+from flow_eval.metrics import list_all_metrics
 
 list_all_metrics()
 ```
@@ -204,8 +204,8 @@ For efficient processing of multiple inputs, you can use the `batch_evaluate` me
 ```python
 # Read the sample data
 import json
-from flow_judge import Vllm, EvalInput, FlowJudge
-from flow_judge.metrics import RESPONSE_FAITHFULNESS_5POINT
+from flow_eval import Vllm, EvalInput, FlowJudge
+from flow_eval.metrics import RESPONSE_FAITHFULNESS_5POINT
 from IPython.display import Markdown, display
 
 # Initialize the model
@@ -255,7 +255,7 @@ for i, result in enumerate(results):
 Create your own evaluation metrics:
 
 ```python
-from flow_judge.metrics import CustomMetric, RubricItem
+from flow_eval.metrics import CustomMetric, RubricItem
 
 custom_metric = CustomMetric(
     name="My Custom Metric",
@@ -339,7 +339,7 @@ We support an integration with Llama Index evaluation module and Haystack:
 
 8. You're now ready to start developing! You can run the main script with:
    ```bash
-   python -m flow_judge
+   python -m flow_eval
    ```
 
 Remember to always activate your virtual environment when working on the project. To deactivate the virtual environment when you're done, simply run:
@@ -362,7 +362,7 @@ To run the tests for Flow-Judge, follow these steps:
 
 3. If you want to run a specific test file, you can do so by specifying the file path:
    ```bash
-   pytest tests/test_flow_judge.py
+   pytest tests/test_flow_eval.py
    ```
 
 4. For more verbose output, you can use the `-v` flag:

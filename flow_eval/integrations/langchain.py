@@ -4,9 +4,9 @@ from typing import Any
 
 from langchain.evaluation import StringEvaluator
 
-from flow_judge import AsyncFlowJudge, EvalInput, FlowJudge
-from flow_judge.metrics import CustomMetric, Metric
-from flow_judge.models import AsyncBaseFlowJudgeModel, BaseFlowJudgeModel
+from flow_eval import AsyncFlowJudge, EvalInput, FlowJudge
+from flow_eval.metrics import CustomMetric, Metric
+from flow_eval.models import AsyncBaseFlowJudgeModel, BaseFlowJudgeModel
 
 
 class FlowJudgeLangChainEvaluator(StringEvaluator):
@@ -114,7 +114,7 @@ class FlowJudgeLangChainEvaluator(StringEvaluator):
     @property
     def evaluation_name(self) -> str:
         """Get metric name."""
-        return f"flow_judge_{self.metric.name}"
+        return f"flow_eval_{self.metric.name}"
 
     def get_required_inputs(self) -> list[str]:
         """Get required inputs."""

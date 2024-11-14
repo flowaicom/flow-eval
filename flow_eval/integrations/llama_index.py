@@ -5,10 +5,10 @@ from typing import Any
 
 from llama_index.core.evaluation import BaseEvaluator, EvaluationResult
 
-from flow_judge.eval_data_types import EvalInput
-from flow_judge.flow_judge import AsyncFlowJudge
-from flow_judge.metrics.metric import CustomMetric, Metric
-from flow_judge.models.common import AsyncBaseFlowJudgeModel
+from flow_eval.eval_data_types import EvalInput
+from flow_eval.flow_eval import AsyncFlowJudge
+from flow_eval.metrics.metric import CustomMetric, Metric
+from flow_eval.models.common import AsyncBaseFlowJudgeModel
 
 logger = logging.getLogger(__name__)
 

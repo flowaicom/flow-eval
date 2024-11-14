@@ -183,6 +183,7 @@ class Baseten(BaseFlowJudgeModel, AsyncBaseFlowJudgeModel):
         else:
             logger.error("Attempting to run an async request with a synchronous API adapter")
 
+    # ! FIXME: This should return a list of str
     async def _async_batch_generate(
         self, prompts: list[str], use_tqdm: bool = True, **kwargs: Any
     ) -> Coroutine[Any, Any, BatchResult]:

@@ -3,11 +3,11 @@ from unittest.mock import patch
 
 import pytest
 
-from flow_judge.eval_data_types import EvalInput, EvalOutput
-from flow_judge.flow_judge import FlowJudge
-from flow_judge.metrics import RESPONSE_CORRECTNESS_BINARY, CustomMetric, RubricItem
-from flow_judge.models.common import BaseFlowJudgeModel
-from flow_judge.utils.prompt_formatter import USER_PROMPT_TEMPLATE, format_rubric, format_vars
+from flow_eval.eval_data_types import EvalInput, EvalOutput
+from flow_eval.flow_eval import FlowJudge
+from flow_eval.metrics import RESPONSE_CORRECTNESS_BINARY, CustomMetric, RubricItem
+from flow_eval.models.common import BaseFlowJudgeModel
+from flow_eval.utils.prompt_formatter import USER_PROMPT_TEMPLATE, format_rubric, format_vars
 
 
 class MockFlowJudgeModel(BaseFlowJudgeModel):
@@ -40,7 +40,7 @@ def mock_model():
     return MockFlowJudgeModel("test-model", "mock", {"temperature": 0.7})
 
 
-def test_flow_judge_initialization(mock_model):
+def test_flow_eval_initialization(mock_model):
     """Test the initialization of FlowJudge."""
     judge = FlowJudge(metric=RESPONSE_CORRECTNESS_BINARY, model=mock_model)
     assert isinstance(judge, FlowJudge)
@@ -48,13 +48,13 @@ def test_flow_judge_initialization(mock_model):
     assert judge.model == mock_model
 
 
-def test_flow_judge_initialization_invalid_metric():
+def test_flow_eval_initialization_invalid_metric():
     """Test FlowJudge initialization with invalid metric."""
     with pytest.raises(ValueError):
         FlowJudge(metric="invalid_metric", model=mock_model)
 
 
-def test_flow_judge_evaluate(mock_model):
+def test_flow_eval_evaluate(mock_model):
     """Test the evaluate method of FlowJudge."""
     judge = FlowJudge(metric=RESPONSE_CORRECTNESS_BINARY, model=mock_model)
     eval_input = EvalInput(
@@ -67,7 +67,7 @@ def test_flow_judge_evaluate(mock_model):
     assert result.score == 1
 
 
-def test_flow_judge_batch_evaluate(mock_model):
+def test_flow_eval_batch_evaluate(mock_model):
     """Test the batch_evaluate method of FlowJudge."""
     judge = FlowJudge(metric=RESPONSE_CORRECTNESS_BINARY, model=mock_model)
     eval_inputs = [
@@ -89,7 +89,7 @@ def test_flow_judge_batch_evaluate(mock_model):
 
 
 @pytest.mark.parametrize("save_results", [True, False])
-def test_flow_judge_evaluate_save_results(mock_model, tmp_path, save_results):
+def test_flow_eval_evaluate_save_results(mock_model, tmp_path, save_results):
     """Test saving results in the evaluate method."""
     judge = FlowJudge(
         metric=RESPONSE_CORRECTNESS_BINARY, model=mock_model, output_dir=str(tmp_path)
@@ -98,7 +98,7 @@ def test_flow_judge_evaluate_save_results(mock_model, tmp_path, save_results):
         inputs=[{"query": "Test query"}, {"reference_answer": "Test reference"}],
         output={"response": "Test response"},
     )
-    with patch("flow_judge.flow_judge.write_results_to_disk") as mock_write:
+    with patch("flow_eval.flow_eval.write_results_to_disk") as mock_write:
         judge.evaluate(eval_input, save_results=save_results)
         if save_results:
             mock_write.assert_called_once()

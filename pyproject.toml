@@ -3,16 +3,15 @@ requires = ["setuptools>=45", "setuptools_scm[toml]>=6.2", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "flow-judge"
-version = "0.1.2"
-description = "A small yet powerful LM Judge"
+name = "flow-eval"
+version = "0.1.0"
+description = "Flow AI evals engine"
 readme = "README.md"
 authors = [
     {name = "Bernardo Garcia", email = "bernardo@flow-ai.com"},
     {name = "Karolus Sariola", email = "karolus@flow-ai.com"},
     {name = "Minaam Shahid", email = "minaam@flow-ai.com"},
     {name = "Tiina Vaahtio", email = "tiina@flow-ai.com"},
-    {name = "Alex Wegrzyn", email = "alex.wegrzyn@flow-ai.com"},
 ]
 license = {file = "LICENSE"}
 classifiers = [
@@ -69,22 +68,25 @@ baseten = [
     "openai>=1.51.0",
     "aiohttp>=3.10.5"
 ]
+openai = [
+    "openai>=1.51.0"
+]
 
 [project.urls]
-Homepage = "https://github.com/flowaicom/flow-judge"
+Homepage = "https://github.com/flowaicom"
 
 [tool.setuptools]
-packages = ["flow_judge", "flow_judge.integrations", "flow_judge.metrics", "flow_judge.models", "flow_judge.utils"]
+packages = ["flow_eval", "flow_eval.integrations", "flow_eval.metrics", "flow_eval.models", "flow_eval.utils"]
 
 [tool.setuptools.package-data]
-"flow_judge.models" = ["adapters/baseten/**/*.yaml"]
+"flow_eval.models" = ["adapters/baseten/**/*.yaml"]
 
 [tool.setuptools_scm]
 version_scheme = "python-simplified-semver"
 
 [tool.ruff]
 line-length = 100
-include = ["flow_judge/**/*.py", "tests/**/*.py", "setup.py"]
+include = ["flow_eval/**/*.py", "tests/**/*.py", "setup.py"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "N", "W", "B", "C", "D"]
@@ -99,12 +101,12 @@ convention = "google"
 [tool.black]
 line-length = 100
 target-version = ['py311']
-include = '(flow_judge/.*\.py$|tests/.*\.py$|setup\.py)'
+include = '(flow_eval/.*\.py$|tests/.*\.py$|setup\.py)'
 
 [tool.isort]
 profile = "black"
 line_length = 100
-src_paths = ["flow_judge", "tests"]
+src_paths = ["flow_eval", "tests"]
 
 [tool.mypy]
 warn_unused_configs = true

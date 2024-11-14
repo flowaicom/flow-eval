@@ -7,7 +7,7 @@ import truss
 from truss.api.definitions import ModelDeployment
 from truss.remote.baseten.error import ApiError
 
-from flow_judge.models.adapters.baseten.management import sync_set_scale_down
+from flow_eval.models.adapters.baseten.management import sync_set_scale_down
 
 from .api_auth import ensure_baseten_authentication, get_baseten_api_key
 from .gpu import ensure_gpu
@@ -27,6 +27,7 @@ class ModelInfo(TypedDict):
     name: str
 
 
+# FIXME: This should be more generic, not flow judge only
 def _initialize_model() -> bool:
     """Initialize the Flow Judge model.
 

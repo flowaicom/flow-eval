@@ -5,9 +5,9 @@ import numpy as np
 from haystack import component, default_from_dict, default_to_dict
 from haystack.utils import deserialize_type
 
-from flow_judge.flow_judge import EvalInput, EvalOutput, FlowJudge
-from flow_judge.metrics.metric import CustomMetric, Metric
-from flow_judge.models.common import BaseFlowJudgeModel
+from flow_eval.flow_eval import EvalInput, EvalOutput, FlowJudge
+from flow_eval.metrics.metric import CustomMetric, Metric
+from flow_eval.models.common import BaseFlowJudgeModel
 
 logger = logging.getLogger(__name__)
 

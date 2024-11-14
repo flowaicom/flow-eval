@@ -21,11 +21,11 @@ pytest
 ```
 To run a specific test file:
 ```sh
-pytest tests/unit/test_flow_judge.py
+pytest tests/unit/test_flow_eval.py
 ```
 To run tests with coverage report:
 ```sh
-pytest --cov=flow_judge --cov-report=term-missing
+pytest --cov=flow_eval --cov-report=term-missing
 ```
 
 ## Contributing
