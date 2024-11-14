@@ -1,64 +1,41 @@
-# `flow-judge`
-
-<p align="center">
-  <img src="img/flow_eval_banner.png" alt="Flow Judge Banner">
-</p>
+# `flow-eval`
 
 <p align="center" style="font-family: 'Courier New', Courier, monospace;">
   <strong>
     <a href="https://www.flow-ai.com/judge">Technical Report</a> |
-    <a href="https://huggingface.co/collections/flowaicom/flow-judge-v01-66e6af5fc3b3a128bde07dec">Model Weights</a> |
-    <a href="https://huggingface.co/spaces/flowaicom/Flow-Judge-v0.1">HuggingFace Space</a> |
-    <a href="https://github.com/flowaicom/lm-evaluation-harness/tree/Flow-Judge-v0.1_evals/lm_eval/tasks/flow_eval_evals">Evaluation Code</a> |
-    <a href="https://github.com/flowaicom/flow-judge/tree/main/examples">Tutorials</a>
+    <a href="https://huggingface.co/collections/flowaicom/flow-eval-v01-66e6af5fc3b3a128bde07dec">Model Weights</a> |
+    <a href="https://huggingface.co/spaces/flowaicom/Flow-eval-v0.1">HuggingFace Space</a> |
+    <a href="https://github.com/flowaicom/lm-evaluation-harness/tree/Flow-eval-v0.1_evals/lm_eval/tasks/flow_eval_evals">Evaluation Code</a> |
+    <a href="https://github.com/flowaicom/flow-eval/tree/main/examples">Tutorials</a>
   </strong>
 </p>
 
-<p align="center" style="font-family: 'Courier New', Courier, monospace;">
-  <code>flow-judge</code> is a lightweight library for evaluating LLM applications with <code>Flow-Judge-v0.1</code>.
-</p>
-
 <p align="center">
-<a href="https://github.com/flowaicom/flow-judge/stargazers/" target="_blank">
-    <img src="https://img.shields.io/github/stars/flowaicom/flow-judge?style=social&label=Star&maxAge=3600" alt="GitHub stars">
+<a href="https://github.com/flowaicom/flow-eval/stargazers/" target="_blank">
+    <img src="https://img.shields.io/github/stars/flowaicom/flow-eval?style=social&label=Star&maxAge=3600" alt="GitHub stars">
 </a>
-<a href="https://github.com/flowaicom/flow-judge/releases" target="_blank">
-    <img src="https://img.shields.io/github/v/release/flowaicom/flow-judge?color=white" alt="Release">
+<a href="https://github.com/flowaicom/flow-eval/releases" target="_blank">
+    <img src="https://img.shields.io/github/v/release/flowaicom/flow-eval?color=white" alt="Release">
 </a>
 <a href="https://www.youtube.com/@flowaicom" target="_blank">
     <img alt="YouTube Channel Views" src="https://img.shields.io/youtube/channel/views/UCo2qL1nIQRHiPc0TF9xbqwg?style=social">
 </a>
-<a href="https://github.com/flowaicom/flow-judge/actions/workflows/test-and-lint.yml" target="_blank">
-    <img src="https://github.com/flowaicom/flow-judge/actions/workflows/test-and-lint.yml/badge.svg" alt="Build">
+<a href="https://github.com/flowaicom/flow-eval/actions/workflows/test-and-lint.yml" target="_blank">
+    <img src="https://github.com/flowaicom/flow-eval/actions/workflows/test-and-lint.yml/badge.svg" alt="Build">
 </a>
-<a href="https://codecov.io/gh/flowaicom/flow-judge" target="_blank">
-    <img src="https://codecov.io/gh/flowaicom/flow-judge/branch/main/graph/badge.svg?token=AEGC7W3DGE" alt="Code coverage">
+<a href="https://codecov.io/gh/flowaicom/flow-eval" target="_blank">
+    <img src="https://codecov.io/gh/flowaicom/flow-eval/branch/main/graph/badge.svg?token=AEGC7W3DGE" alt="Code coverage">
 </a>
-<a href="https://github.com/flowaicom/flow-judge/blob/main/LICENSE" target="_blank">
+<a href="https://github.com/flowaicom/flow-eval/blob/main/LICENSE" target="_blank">
     <img src="https://img.shields.io/static/v1?label=license&message=Apache%202.0&color=white" alt="License">
 </a>
-<a href="https://app.fossa.com/projects/git%2Bgithub.com%2Fflowaicom%2Fflow-judge?ref=badge_shield" alt="FOSSA Status"><img src="https://app.fossa.com/api/projects/git%2Bgithub.com%2Fflowaicom%2Fflow-judge.svg?type=shield"/></a>
+<a href="https://app.fossa.com/projects/git%2Bgithub.com%2Fflowaicom%2Fflow-eval?ref=badge_shield" alt="FOSSA Status"><img src="https://app.fossa.com/api/projects/git%2Bgithub.com%2Fflowaicom%2Fflow-eval.svg?type=shield"/></a>
 </p>
 
 
-## Model
-`Flow-Judge-v0.1` is an open, small yet powerful language model evaluator trained on a synthetic dataset containing LLM system evaluation data by Flow AI.
-
-You can learn more about the unique features of our model in the [technical report](https://www.flow-ai.com/blog/flow-judge#flow-judge-an-open-small-language-model-for-llm-system-evaluations).
-
-
-## Features of the library
-
-- Support for multiple model types: Hugging Face Transformers and vLLM
-- Extensible architecture for custom metrics
-- Pre-defined evaluation metrics
-- Ease of custom metric and rubric creation
-- Batched evaluation for efficient processing
-- Integrations with most popular frameworks like Llama Index
-
 ## Installation
 
-Install flow-judge using pip:
+Install flow-eval using pip:
 
 ```bash
 pip install -e ".[vllm,hf]"
@@ -178,18 +155,18 @@ The library supports multiple inference backends to accommodate different hardwa
 
   model = Baseten()
   ```
-  For detailed information on using Baseten, visit the [Baseten readme](https://github.com/flowaicom/flow-judge/blob/feat/baseten-integration/flow_eval/models/adapters/baseten/README.md).
+  For detailed information on using Baseten, visit the [Baseten readme](https://github.com/flowaicom/flow-eval/blob/feat/baseten-integration/flow_eval/models/adapters/baseten/README.md).
 
 Choose the inference backend that best matches your hardware and performance requirements. The library provides a unified interface for all these options, making it easy to switch between them as needed.
 
 
 ### Evaluation Metrics
 
-`Flow-Judge-v0.1` was trained to handle any custom metric that can be expressed as a combination of evaluation criteria and rubric, and required inputs and outputs.
+`Flow-eval-v0.1` was trained to handle any custom metric that can be expressed as a combination of evaluation criteria and rubric, and required inputs and outputs.
 
 #### Pre-defined Metrics
 
-For convenience, `flow-judge` library comes with pre-defined metrics such as `RESPONSE_CORRECTNESS` or `RESPONSE_FAITHFULNESS`. You can check the full list by running:
+For convenience, `flow-eval` library comes with pre-defined metrics such as `RESPONSE_CORRECTNESS` or `RESPONSE_FAITHFULNESS`. You can check the full list by running:
 
 ```python
 from flow_eval.metrics import list_all_metrics
@@ -268,22 +245,22 @@ custom_metric = CustomMetric(
     required_output="response"
 )
 
-judge = FlowJudge(metric=custom_metric, config="Flow-Judge-v0.1-AWQ")
+judge = FlowJudge(metric=custom_metric, config="Flow-eval-v0.1-AWQ")
 ```
 
 ### Integrations
 
 We support an integration with Llama Index evaluation module and Haystack:
-- [Llama Index tutorial](https://github.com/flowaicom/flow-judge/blob/main/examples/4_llama_index_evaluators.ipynb)
-- [Haystack tutorial](https://github.com/flowaicom/flow-judge/blob/main/examples/5_evaluate_haystack_rag_pipeline.ipynb)
+- [Llama Index tutorial](https://github.com/flowaicom/flow-eval/blob/main/examples/4_llama_index_evaluators.ipynb)
+- [Haystack tutorial](https://github.com/flowaicom/flow-eval/blob/main/examples/5_evaluate_haystack_rag_pipeline.ipynb)
 
 > Note that we are currently working on adding more integrations with other frameworks in the near future.
 ## Development Setup
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/flowaicom/flow-judge.git
-   cd flow-judge
+   git clone https://github.com/flowaicom/flow-eval.git
+   cd flow-eval
    ```
 
 2. Create a virtual environment:
@@ -349,7 +326,7 @@ deactivate
 
 ## Running Tests
 
-To run the tests for Flow-Judge, follow these steps:
+To run the tests for Flow-eval, follow these steps:
 
 1. Navigate to the root directory of the project in your terminal.
 
@@ -371,7 +348,7 @@ To run the tests for Flow-Judge, follow these steps:
    ```
 ## Contributing
 
-Contributions to `flow-judge` are welcome! Please follow these steps:
+Contributions to `flow-eval` are welcome! Please follow these steps:
 
 1. Fork the repository
 2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
@@ -385,8 +362,8 @@ Please ensure that your code adheres to the project's coding standards and passe
 
 This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENSE) file for details.
 
-[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fflowaicom%2Fflow-judge.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2Fflowaicom%2Fflow-judge?ref=badge_large)
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fflowaicom%2Fflow-eval.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2Fflowaicom%2Fflow-eval?ref=badge_large)
 
 ## Acknowledgments
 
-Flow-Judge is developed and maintained by the Flow AI team. We appreciate the contributions and feedback from the AI community in making this tool more robust and versatile.
+Flow-eval is developed and maintained by the Flow AI team. We appreciate the contributions and feedback from the AI community in making this tool more robust and versatile.
