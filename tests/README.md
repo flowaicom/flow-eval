@@ -1,15 +1,16 @@
 
 # Tests for Flow Judge
 
-This directory contains the test suite for the Flow Judge project.
+This directory contains the test suite for the Flow Eval project.
 
 ## Test Coverage
 
-Below is the current test coverage visualization for the Flow Judge project:
+Below is the current test coverage visualization for the Flow Eval project:
 
+FIXME
 <p align="center">
-  <a href="https://codecov.io/gh/flowaicom/flow-judge" target="_blank">
-    <img src="https://codecov.io/gh/flowaicom/flow-judge/branch/main/graphs/sunburst.svg?token=AEGC7W3DGE" alt="Codecov Sunburst Graph">
+  <a href="https://codecov.io/gh/flowaicom/flow-eval" target="_blank">
+    <img src="https://codecov.io/gh/flowaicom/flow-eval/branch/main/graphs/sunburst.svg?token=AEGC7W3DGE" alt="Codecov Sunburst Graph">
   </a>
 </p>
 

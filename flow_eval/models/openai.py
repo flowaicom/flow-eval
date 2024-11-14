@@ -40,7 +40,7 @@ class OpenAIModelConfig(ModelConfig):
 class OpenAIModel(BaseFlowJudgeModel, AsyncBaseFlowJudgeModel):
     """Combined FlowJudge Model class for OpenAI-compatible APIs (OpenAI, Together, etc.)."""
 
-    _DEFAULT_MODEL_ID = "gpt-4"
+    _DEFAULT_MODEL_ID = "gpt-4o"
     _DEFAULT_BASE_URL = "https://api.openai.com/v1"
     _DEFAULT_KEY_VAR = "OPENAI_API_KEY"
 
