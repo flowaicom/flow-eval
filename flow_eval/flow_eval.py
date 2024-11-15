@@ -220,7 +220,6 @@ class AsyncFlowJudge(BaseFlowJudge):
                 EvalOutput.parse(response, fail_on_parse_error=fail_on_parse_error)
                 for response in batch_result
             ]
-        logger.warning(f"{eval_outputs}")
         parse_failures = sum(1 for output in eval_outputs if output.score and output.score == -1)
 
         if save_results:
