@@ -1,9 +1,9 @@
 from importlib.metadata import PackageNotFoundError, version
 
 from flow_eval.eval_data_types import EvalInput, EvalOutput
-from flow_eval.flow_eval import AsyncFlowJudge, FlowJudge
+from flow_eval.flow_eval import AsyncEvaluator, Evaluator
 from flow_eval.metrics import CustomMetric, Metric, RubricItem, list_all_metrics
-from flow_eval.models.common import BaseFlowJudgeModel
+from flow_eval.models.common import BaseEvaluatorModel
 from flow_eval.utils.prompt_formatter import format_rubric, format_user_prompt, format_vars
 
 try:
@@ -13,8 +13,8 @@ except PackageNotFoundError:
     __version__ = "unknown"
 
 __all__ = [
-    "FlowJudge",
-    "AsyncFlowJudge",
+    "Evaluator",
+    "AsyncEvaluator",
     "EvalInput",
     "format_vars",
     "format_rubric",
@@ -22,7 +22,7 @@ __all__ = [
     "RubricItem",
     "Metric",
     "CustomMetric",
-    "BaseFlowJudgeModel",
+    "BaseEvaluatorModel",
     "EvalOutput",
 ]
 
@@ -65,7 +65,7 @@ except ImportError:
 
 def get_available_models():
     """Return a list of available model classes based on installed extras."""
-    models = [BaseFlowJudgeModel]
+    models = [BaseEvaluatorModel]
     if Hf is not None:
         models.append(Hf)
     if Vllm is not None:

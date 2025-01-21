@@ -12,7 +12,7 @@ from llama_index.core.llama_dataset import download_llama_dataset
 from pydantic import BaseModel
 
 from flow_eval import Baseten
-from flow_eval.integrations.llama_index import LlamaIndexFlowJudge
+from flow_eval.integrations.llama_index import LlamaIndexEvaluator
 from flow_eval.metrics import CustomMetric, RubricItem
 
 pytest_plugins = ("pytest_asyncio",)
@@ -145,7 +145,7 @@ def compare_distributions(
 
 
 async def batch_eval_runner(
-    evaluators: dict[str, LlamaIndexFlowJudge],
+    evaluators: dict[str, LlamaIndexEvaluator],
     query_engine: Any,
     questions: list[str],
     reference: list[str] | None = None,
@@ -154,7 +154,7 @@ async def batch_eval_runner(
     """Runs batch evaluation using the provided evaluators and query engine.
 
     Args:
-        evaluators (Dict[str, LlamaIndexFlowJudge]): Dictionary of evaluators.
+        evaluators (Dict[str, LlamaIndexEvaluator]): Dictionary of evaluators.
         query_engine (Any): The query engine to use for generating responses.
         questions (List[str]): List of questions to evaluate.
         reference (Optional[List[str]], optional): List of reference answers.
@@ -177,7 +177,7 @@ async def test_baseten_correctness_evaluation(
     correctness_metric: CustomMetric,
     test_cache_dir: Path,
 ) -> None:
-    """Tests the correctness evaluation of Baseten model using LlamaIndexFlowJudge.
+    """Tests the correctness evaluation of Baseten model using LlamaIndexEvaluator.
 
     Args:
         test_config (TestConfig): Test configuration object.
@@ -194,7 +194,7 @@ async def test_baseten_correctness_evaluation(
         exec_async=True,
         webhook_proxy_url=test_config.webhook_url,
     )
-    flow_eval_evaluator = LlamaIndexFlowJudge(model=model, metric=correctness_metric)
+    flow_eval_evaluator = LlamaIndexEvaluator(model=model, metric=correctness_metric)
 
     # Download and prepare the dataset
     rag_dataset, documents = download_llama_dataset(
@@ -244,7 +244,7 @@ async def test_baseten_batch_evaluation(
     )
     logger.info("Starting test_baseten_batch_evaluation")
 
-    flow_eval_correctness = LlamaIndexFlowJudge(model=model, metric=correctness_metric)
+    flow_eval_correctness = LlamaIndexEvaluator(model=model, metric=correctness_metric)
 
     # Download and prepare the dataset
     rag_dataset, documents = download_llama_dataset(

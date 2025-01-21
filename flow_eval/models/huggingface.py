@@ -3,7 +3,7 @@ import os
 import warnings
 from typing import Any
 
-from flow_eval.models.common import BaseFlowJudgeModel, GenerationParams, ModelConfig, ModelType
+from flow_eval.models.common import BaseEvaluatorModel, GenerationParams, ModelConfig, ModelType
 
 try:
     import torch
@@ -48,8 +48,8 @@ class HfConfig(ModelConfig):
         self.kwargs = kwargs
 
 
-class Hf(BaseFlowJudgeModel):
-    """FlowJudge model class for Hugging Face Transformers."""
+class Hf(BaseEvaluatorModel):
+    """Evaluator model class for Hugging Face Transformers."""
 
     _DEFAULT_MODEL_ID = "flowaicom/Flow-Judge-v0.1"
 
@@ -59,7 +59,7 @@ class Hf(BaseFlowJudgeModel):
         flash_attn: bool = True,
         **kwargs: Any,
     ):
-        """Initialize the FlowJudge Hugging Face Transformers model.
+        """Initialize the Evaluator Hugging Face Transformers model.
 
         :param generation_params: Dictionary of parameters for text generation.
         :param flash_attn: Whether to use flash attention.
@@ -207,7 +207,7 @@ class Hf(BaseFlowJudgeModel):
         return generation_kwargs
 
     def _generate(self, prompt: str) -> str:
-        """Generate a response using the FlowJudge Hugging Face Transformers model."""
+        """Generate a response using the Evaluator Hugging Face Transformers model."""
         chat_prompt = self.tokenizer.apply_chat_template(
             [{"role": "user", "content": prompt}], tokenize=False, add_generation_prompt=True
         )

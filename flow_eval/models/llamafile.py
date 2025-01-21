@@ -15,8 +15,8 @@ import requests
 from tqdm import tqdm
 
 from flow_eval.models.common import (
-    AsyncBaseFlowJudgeModel,
-    BaseFlowJudgeModel,
+    AsyncBaseEvaluatorModel,
+    BaseEvaluatorModel,
     GenerationParams,
     ModelConfig,
     ModelType,
@@ -114,8 +114,8 @@ def cleanup_llamafile(process_ref):
                     pass
 
 
-class Llamafile(BaseFlowJudgeModel, AsyncBaseFlowJudgeModel):
-    """Combined FlowJudge model class for Llamafile supporting both sync and async operations."""
+class Llamafile(BaseEvaluatorModel, AsyncBaseEvaluatorModel):
+    """Combined Evaluator model class for Llamafile supporting both sync and async operations."""
 
     _instances = set()
     _next_port = 8085
@@ -144,7 +144,7 @@ class Llamafile(BaseFlowJudgeModel, AsyncBaseFlowJudgeModel):
         llamafile_server_kwargs: dict[str, Any] | None = None,
         **kwargs: Any,
     ):
-        """Initialize the FlowJudge Llamafile model.
+        """Initialize the Evaluator Llamafile model.
 
         :param model_id: Identifier for the model. If None, uses the default model.
         :param generation_params: Dictionary of parameters for text generation. Can include:
@@ -223,10 +223,10 @@ class Llamafile(BaseFlowJudgeModel, AsyncBaseFlowJudgeModel):
         self.config = config
 
         # Call both parent class initializers
-        BaseFlowJudgeModel.__init__(
+        BaseEvaluatorModel.__init__(
             self, model_id, self._MODEL_TYPE, config.generation_params, **kwargs
         )
-        AsyncBaseFlowJudgeModel.__init__(
+        AsyncBaseEvaluatorModel.__init__(
             self, model_id, self._MODEL_TYPE, config.generation_params, **kwargs
         )
 

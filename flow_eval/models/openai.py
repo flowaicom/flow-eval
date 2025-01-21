@@ -5,8 +5,8 @@ from tqdm import tqdm
 
 from .adapters.openai.adapter import AsyncOpenAIAdapter, OpenAIAdapter
 from .common import (
-    AsyncBaseFlowJudgeModel,
-    BaseFlowJudgeModel,
+    AsyncBaseEvaluatorModel,
+    BaseEvaluatorModel,
     ModelConfig,
     ModelType,
     OpenAIGenerationParams,
@@ -37,8 +37,8 @@ class OpenAIModelConfig(ModelConfig):
         super().__init__(model_id, model_type, generation_params, exec_async=exec_async, **kwargs)
 
 
-class OpenAIModel(BaseFlowJudgeModel, AsyncBaseFlowJudgeModel):
-    """Combined FlowJudge Model class for OpenAI-compatible APIs (OpenAI, Together, etc.)."""
+class OpenAIModel(BaseEvaluatorModel, AsyncBaseEvaluatorModel):
+    """Combined Evaluator Model class for OpenAI-compatible APIs (OpenAI, Together, etc.)."""
 
     _DEFAULT_MODEL_ID = "gpt-4o"
     _DEFAULT_BASE_URL = "https://api.openai.com/v1"

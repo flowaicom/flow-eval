@@ -1,7 +1,7 @@
 from pydantic import BaseModel, Field, field_validator
 from typing_extensions import TypedDict
 
-from flow_eval.models.adapters.baseten.errors import FlowJudgeError
+from flow_eval.models.adapters.baseten.errors import EvaluatorError
 
 
 class Message(TypedDict):
@@ -31,7 +31,7 @@ class BatchResult(BaseModel):
 
     Attributes:
         successful_outputs (List[Message]): List of successful evaluation outputs.
-        errors (List[FlowJudgeError]): List of errors encountered during evaluation.
+        errors (List[EvaluatorError]): List of errors encountered during evaluation.
         total_requests (int): Total number of requests processed in the batch.
         success_rate (float): Rate of successful evaluations (0.0 to 1.0).
 
@@ -44,7 +44,7 @@ class BatchResult(BaseModel):
     successful_outputs: list[Message] = Field(
         default_factory=list, description="List of successful evaluation outputs"
     )
-    errors: list[FlowJudgeError] = Field(
+    errors: list[EvaluatorError] = Field(
         default_factory=list, description="List of errors encountered during evaluation"
     )
     total_requests: int = Field(..., description="Total number of requests processed")

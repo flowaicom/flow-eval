@@ -24,7 +24,7 @@ from flow_eval.models.adapters.baseten.errors import (
     BasetenRateLimitError,
     BasetenRequestError,
     BasetenResponseError,
-    FlowJudgeError,
+    EvaluatorError,
 )
 from flow_eval.models.adapters.baseten.management import (
     get_production_deployment_status,
@@ -349,19 +349,19 @@ class AsyncBasetenAPIAdapter(AsyncBaseAPIAdapter):
 
                 return message
 
-    async def _process_request_with_retry(self, message: Message) -> Message | FlowJudgeError:
+    async def _process_request_with_retry(self, message: Message) -> Message | EvaluatorError:
         """Process a single request message with retry and exponential backoff.
 
         Args:
             message (Message): The request message to process.
 
         Returns:
-            Union[Message, FlowJudgeError]: The processed output or an error object.
+            Union[Message, EvaluatorError]: The processed output or an error object.
 
         Note:
             This method implements a retry mechanism with exponential backoff.
             It will attempt to process the request up to self.max_retries times
-            before giving up and returning a FlowJudgeError.
+            before giving up and returning a EvaluatorError.
         """
 
         @retry(
@@ -389,14 +389,14 @@ class AsyncBasetenAPIAdapter(AsyncBaseAPIAdapter):
             message["response"] = response
             return message
         except RetryError as e:
-            return FlowJudgeError(
+            return EvaluatorError(
                 error_type="RetryError",
                 error_message=str(e),
                 request_id=message["id"],
                 retry_count=self.max_retries,
             )
         except (BasetenAPIError, ValueError) as e:
-            return FlowJudgeError(
+            return EvaluatorError(
                 error_type=type(e).__name__,
                 error_message=str(e),
                 request_id=message["id"],
@@ -476,7 +476,7 @@ class AsyncBasetenAPIAdapter(AsyncBaseAPIAdapter):
         if not is_scaled_down:
             logger.warning("Unable to reduce scale down delay. Continuing with default.")
 
-    async def _async_fetch_response(self, prompt: str) -> Message | FlowJudgeError:
+    async def _async_fetch_response(self, prompt: str) -> Message | EvaluatorError:
         """Single async request to Baseten.
 
         Args:
@@ -484,14 +484,14 @@ class AsyncBasetenAPIAdapter(AsyncBaseAPIAdapter):
 
         Returns:
             A message dictionary or an error.
-            (Message | FlowJudgeError)
+            (Message | EvaluatorError)
         """
         # Attempt to initialize the model state.
         try:
             await self._check_webhook_health()
             await self._initialize_state_for_request(scale_down_delay=120)
         except BasetenAPIError as e:
-            return FlowJudgeError(
+            return EvaluatorError(
                 error_type=type(e).__name__, error_message=str(e), request_id=None
             )
 
@@ -499,7 +499,7 @@ class AsyncBasetenAPIAdapter(AsyncBaseAPIAdapter):
             Message(prompt=prompt, index=1, id=None, response=None)
         )
 
-        if isinstance(result, FlowJudgeError):
+        if isinstance(result, EvaluatorError):
             return result
 
         return result["response"]
@@ -531,7 +531,7 @@ class AsyncBasetenAPIAdapter(AsyncBaseAPIAdapter):
             return BatchResult(
                 successful_outputs=[],
                 errors=[
-                    FlowJudgeError(
+                    EvaluatorError(
                         error_type=type(e).__name__, error_message=str(e), request_id=None
                     )
                 ],
@@ -544,7 +544,7 @@ class AsyncBasetenAPIAdapter(AsyncBaseAPIAdapter):
                 await self._check_webhook_health()
             except BasetenAPIError as e:
                 all_results.append(
-                    FlowJudgeError(
+                    EvaluatorError(
                         error_type=type(e).__name__,
                         error_message=str(e),
                         request_id=None,
@@ -567,7 +567,7 @@ class AsyncBasetenAPIAdapter(AsyncBaseAPIAdapter):
                 key in list(Message.__annotations__.keys()) for key, _ in result.items()
             ):
                 successful_outputs.append(result)
-            elif isinstance(result, FlowJudgeError):
+            elif isinstance(result, EvaluatorError):
                 errors.append(result)
 
         successful_outputs = sorted(successful_outputs, key=lambda o: o["index"])

@@ -4,8 +4,8 @@ import warnings
 from typing import Any
 
 from flow_eval.models.common import (
-    AsyncBaseFlowJudgeModel,
-    BaseFlowJudgeModel,
+    AsyncBaseEvaluatorModel,
+    BaseEvaluatorModel,
     ModelConfig,
     ModelType,
     VllmGenerationParams,
@@ -62,8 +62,8 @@ class VllmConfig(ModelConfig):
         self.exec_async = exec_async
 
 
-class Vllm(BaseFlowJudgeModel, AsyncBaseFlowJudgeModel):
-    """Combined FlowJudge model class for vLLM supporting both sync and async operations.
+class Vllm(BaseEvaluatorModel, AsyncBaseEvaluatorModel):
+    """Combined Evaluator model class for vLLM supporting both sync and async operations.
 
     This class provides an interface to use vLLM for text generation. It supports both
     synchronous and asynchronous operations, quantization, and various configuration options.
@@ -82,7 +82,7 @@ class Vllm(BaseFlowJudgeModel, AsyncBaseFlowJudgeModel):
         exec_async: bool = False,
         **kwargs: Any,
     ):
-        """Initialize the FlowJudge vLLM model.
+        """Initialize the Evaluator vLLM model.
 
         :param generation_params: Dictionary of parameters for text generation. Can include:
             - temperature: float (default: 0.1)
@@ -216,7 +216,7 @@ class Vllm(BaseFlowJudgeModel, AsyncBaseFlowJudgeModel):
             ) from e
 
     def _generate(self, prompt: str) -> str:
-        """Generate a response using the FlowJudge vLLM model."""
+        """Generate a response using the Evaluator vLLM model."""
         if self.exec_async:
             return asyncio.run(self._async_generate(prompt))
 
@@ -228,7 +228,7 @@ class Vllm(BaseFlowJudgeModel, AsyncBaseFlowJudgeModel):
     def _batch_generate(
         self, prompts: list[str], use_tqdm: bool = True, **kwargs: Any
     ) -> list[str]:
-        """Generate responses for multiple prompts using the FlowJudge vLLM model."""
+        """Generate responses for multiple prompts using the Evaluator vLLM model."""
         if self.exec_async:
             return asyncio.run(self._async_batch_generate(prompts, use_tqdm, **kwargs))
 

@@ -6,26 +6,26 @@ from typing import Any
 from llama_index.core.evaluation import BaseEvaluator, EvaluationResult
 
 from flow_eval.eval_data_types import EvalInput
-from flow_eval.flow_eval import AsyncFlowJudge
+from flow_eval.flow_eval import AsyncEvaluator
 from flow_eval.metrics.metric import CustomMetric, Metric
-from flow_eval.models.common import AsyncBaseFlowJudgeModel
+from flow_eval.models.common import AsyncBaseEvaluatorModel
 
 logger = logging.getLogger(__name__)
 
 
-class LlamaIndexFlowJudge(BaseEvaluator):
-    """A custom evaluator for LlamaIndex that uses FlowJudge to evaluate RAG system performance.
+class LlamaIndexEvaluator(BaseEvaluator):
+    """A custom evaluator for LlamaIndex that uses Evaluator to evaluate RAG system performance.
 
-    This class integrates FlowJudge with LlamaIndex's evaluation framework, allowing for
+    This class integrates Evaluator with LlamaIndex's evaluation framework, allowing for
     seamless evaluation of retrieval-augmented generation (RAG) systems using custom metrics
     and models.
 
     Attributes:
         metric (Metric | CustomMetric): The evaluation metric to be used.
-        model (AsyncBaseFlowJudgeModel): The model used for evaluation.
+        model (AsyncBaseEvaluatorModel): The model used for evaluation.
         output_dir (str): Directory to save evaluation results.
         save_results (bool): Whether to save evaluation results to disk.
-        judge (AsyncFlowJudge): The FlowJudge instance used for evaluation.
+        judge (AsyncEvaluator): The Evaluator instance used for evaluation.
 
     Raises:
         ValueError: If invalid metric or model types are provided.
@@ -34,11 +34,11 @@ class LlamaIndexFlowJudge(BaseEvaluator):
     def __init__(
         self,
         metric: Metric | CustomMetric,
-        model: AsyncBaseFlowJudgeModel,
+        model: AsyncBaseEvaluatorModel,
         output_dir: str = "output/",
         save_results: bool = False,
     ) -> None:
-        """Initialize the LlamaIndexFlowJudge.
+        """Initialize the LlamaIndexEvaluator.
 
         Args:
             metric: The evaluation metric to be used.
@@ -53,14 +53,14 @@ class LlamaIndexFlowJudge(BaseEvaluator):
             raise ValueError("Invalid metric type. Use Metric or CustomMetric.")
         self.metric = metric
 
-        if not isinstance(model, AsyncBaseFlowJudgeModel):
-            raise ValueError("Invalid model type. Use AsyncBaseFlowJudgeModel or its subclasses.")
+        if not isinstance(model, AsyncBaseEvaluatorModel):
+            raise ValueError("Invalid model type. Use AsyncBaseEvaluatorModel or its subclasses.")
         self.model = model
 
         self.output_dir = output_dir
         self.save_results = save_results
 
-        self.judge = AsyncFlowJudge(
+        self.judge = AsyncEvaluator(
             metric=self.metric, model=self.model, output_dir=self.output_dir
         )
 

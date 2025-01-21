@@ -4,32 +4,32 @@ from typing import Any
 
 from langchain.evaluation import StringEvaluator
 
-from flow_eval import AsyncFlowJudge, EvalInput, FlowJudge
+from flow_eval import AsyncEvaluator, EvalInput, Evaluator
 from flow_eval.metrics import CustomMetric, Metric
-from flow_eval.models import AsyncBaseFlowJudgeModel, BaseFlowJudgeModel
+from flow_eval.models import AsyncBaseEvaluatorModel, BaseEvaluatorModel
 
 
-class FlowJudgeLangChainEvaluator(StringEvaluator):
-    """FlowJudgeLangchainEvaluator is a custom evaluator for LangChain.
+class EvaluatorLangChainEvaluator(StringEvaluator):
+    """EvaluatorLangchainEvaluator is a custom evaluator for LangChain.
 
-    It uses FlowJudge to evaluate the LLM outputs.
+    It uses Evaluator to evaluate the LLM outputs.
     """
 
     def __init__(
-        self, metric: Metric | CustomMetric, model: BaseFlowJudgeModel | AsyncBaseFlowJudgeModel
+        self, metric: Metric | CustomMetric, model: BaseEvaluatorModel | AsyncBaseEvaluatorModel
     ):
-        """Initialize the LlamaIndexFlowJudge."""
+        """Initialize the LlamaIndexEvaluator."""
         if isinstance(metric, (Metric, CustomMetric)):
             self.metric = metric
         else:
             raise ValueError("Invalid metric type. Use Metric or CustomMetric.")
 
-        # Validate model and choose appropriate FlowJudge class
-        if isinstance(model, (BaseFlowJudgeModel, AsyncBaseFlowJudgeModel)):
+        # Validate model and choose appropriate Evaluator class
+        if isinstance(model, (BaseEvaluatorModel, AsyncBaseEvaluatorModel)):
             self.model = model
         else:
             raise ValueError(
-                "The model must be an instance of BaseFlowJudgeModel or AsyncBaseFlowJudgeModel."
+                "The model must be an instance of BaseEvaluatorModel or AsyncBaseEvaluatorModel."
             )
 
         # Determine if the model is async-capable
@@ -37,9 +37,9 @@ class FlowJudgeLangChainEvaluator(StringEvaluator):
 
         # Initialize the appropriate judge based on async capability
         if self.is_async:
-            self.judge = AsyncFlowJudge(metric=self.metric, model=self.model)
+            self.judge = AsyncEvaluator(metric=self.metric, model=self.model)
         else:
-            self.judge = FlowJudge(metric=self.metric, model=self.model)
+            self.judge = Evaluator(metric=self.metric, model=self.model)
 
     def _prepare_eval_input(
         self,

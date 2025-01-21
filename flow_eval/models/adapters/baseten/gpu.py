@@ -85,7 +85,7 @@ def _update_config() -> bool:
 
 
 def ensure_gpu() -> bool:
-    """Enable GPU selection for FlowJudge model deployment.
+    """Enable GPU selection for Evaluator model deployment.
 
     :return: True if successfully updated, False otherwise
     :rtype: bool
@@ -94,7 +94,7 @@ def ensure_gpu() -> bool:
         return _update_config()
 
     if is_interactive():
-        print("What GPU on Baseten should we deploy the FlowJudge model to?")
+        print("What GPU on Baseten should we deploy the Evaluator model to?")
         print(" ➡️ H100")
         print(" ➡️ A10G: default")
         print("Would you like to switch your deployment to H100?")
@@ -102,7 +102,7 @@ def ensure_gpu() -> bool:
 
     else:
         logger.info("Non-interactive environment detected")
-        print("What GPU on Baseten should we deploy the FlowJudge model to?")
+        print("What GPU on Baseten should we deploy the Evaluator model to?")
         print(" ➡️ H100")
         print(" ➡️ A10G")
         print("Please set the environment variable to the appropriate value:")

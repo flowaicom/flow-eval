@@ -7,8 +7,8 @@ from .adapters.baseten.data_io import BatchResult
 from .adapters.baseten.deploy import ensure_model_deployment, get_deployed_model_id
 from .adapters.baseten.webhook import ensure_baseten_webhook_secret
 from .common import (
-    AsyncBaseFlowJudgeModel,
-    BaseFlowJudgeModel,
+    AsyncBaseEvaluatorModel,
+    BaseEvaluatorModel,
     ModelConfig,
     ModelType,
     VllmGenerationParams,
@@ -57,8 +57,8 @@ class BasetenModelConfig(ModelConfig):
         self.async_batch_size = async_batch_size
 
 
-class Baseten(BaseFlowJudgeModel, AsyncBaseFlowJudgeModel):
-    """Combined FlowJudge Model class for Baseten sync and webhook async operations."""
+class Baseten(BaseEvaluatorModel, AsyncBaseEvaluatorModel):
+    """Combined Evaluator Model class for Baseten sync and webhook async operations."""
 
     def __init__(
         self,

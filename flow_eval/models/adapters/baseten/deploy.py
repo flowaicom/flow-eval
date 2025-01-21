@@ -35,7 +35,7 @@ def _initialize_model() -> bool:
     :rtype: bool
     """
     logger.info("Initializing Flow Judge model")
-    if _is_flowjudge_deployed():
+    if _is_evaluator_deployed():
         logger.info("Flow Judge already deployed")
         return True
 
@@ -111,7 +111,7 @@ def _get_models() -> list[ModelInfo] | None:
         return None
 
 
-def _is_flowjudge_deployed() -> bool:
+def _is_evaluator_deployed() -> bool:
     """Check if Flow Judge is already deployed.
 
     :return: True if Flow Judge is deployed, False otherwise.

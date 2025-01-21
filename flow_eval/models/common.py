@@ -7,13 +7,13 @@ from pydantic import BaseModel, Field
 from .adapters.base import BaseAPIAdapter
 
 
-class BaseFlowJudgeModel(ABC):
-    """Base class for all FlowJudge models."""
+class BaseEvaluatorModel(ABC):
+    """Base class for all Evaluator models."""
 
     def __init__(
         self, model_id: str, model_type: str, generation_params: dict[str, Any], **kwargs: Any
     ) -> None:
-        """Initialize the base FlowJudge model."""
+        """Initialize the base Evaluator model."""
         self.metadata: dict[str, Any] = {
             "model_id": model_id,
             "model_type": model_type,
@@ -34,13 +34,13 @@ class BaseFlowJudgeModel(ABC):
         pass
 
 
-class AsyncBaseFlowJudgeModel(ABC):
-    """Base class for asynchronous FlowJudge models."""
+class AsyncBaseEvaluatorModel(ABC):
+    """Base class for asynchronous Evaluator models."""
 
     def __init__(
         self, model_id: str, model_type: str, generation_params: dict[str, Any], **kwargs: Any
     ) -> None:
-        """Initialize the base asynchronous FlowJudge model."""
+        """Initialize the base asynchronous Evaluator model."""
         self.metadata: dict[str, Any] = {
             "model_id": model_id,
             "model_type": model_type,
@@ -61,7 +61,7 @@ class AsyncBaseFlowJudgeModel(ABC):
         pass
 
 
-class FlowJudgeRemoteModel(BaseFlowJudgeModel):
+class EvaluatorRemoteModel(BaseEvaluatorModel):
     """Flow judge model class for remote hosting."""
 
     def __init__(
@@ -72,7 +72,7 @@ class FlowJudgeRemoteModel(BaseFlowJudgeModel):
         api_adapter: BaseAPIAdapter,
         **remote_kwargs: Any,
     ):
-        """Initialize the FlowJudge remote model class.
+        """Initialize the Evaluator remote model class.
 
         :param model_id: The ID of the model.
         :param model_type: Type of the model based on ModelType.

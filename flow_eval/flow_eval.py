@@ -4,8 +4,8 @@ import logging
 from flow_eval.eval_data_types import EvalInput, EvalOutput
 from flow_eval.metrics import CustomMetric, Metric
 from flow_eval.models.adapters.baseten.data_io import BatchResult
-from flow_eval.models.adapters.baseten.errors import FlowJudgeError
-from flow_eval.models.common import AsyncBaseFlowJudgeModel, BaseFlowJudgeModel
+from flow_eval.models.adapters.baseten.errors import EvaluatorError
+from flow_eval.models.common import AsyncBaseEvaluatorModel, BaseEvaluatorModel
 from flow_eval.utils.prompt_formatter import format_rubric, format_user_prompt, format_vars
 from flow_eval.utils.result_writer import write_results_to_disk
 from flow_eval.utils.validators import validate_eval_input
@@ -14,16 +14,16 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
-class BaseFlowJudge:
-    """Base class for FlowJudge with common functionality."""
+class BaseEvaluator:
+    """Base class for Evaluator with common functionality."""
 
     def __init__(
         self,
         metric: Metric | CustomMetric,
-        model: BaseFlowJudgeModel | AsyncBaseFlowJudgeModel,
+        model: BaseEvaluatorModel | AsyncBaseEvaluatorModel,
         output_dir: str | None = "output/",
     ):
-        """Initialize BaseFlowJudge with a metric and model."""
+        """Initialize BaseEvaluator with a metric and model."""
         if not isinstance(metric, (Metric, CustomMetric)):
             raise ValueError("Invalid metric type. Use Metric or CustomMetric.")
         self.metric = metric
@@ -63,19 +63,19 @@ class BaseFlowJudge:
         )
 
 
-class FlowJudge(BaseFlowJudge):
-    """Synchronous FlowJudge class for evaluating AI outputs."""
+class Evaluator(BaseEvaluator):
+    """Synchronous Evaluator class for evaluating AI outputs."""
 
     def __init__(
         self,
         metric: Metric | CustomMetric,
-        model: BaseFlowJudgeModel,
+        model: BaseEvaluatorModel,
         output_dir: str | None = "output/",
     ):
-        """Initialize FlowJudge with a metric and model."""
+        """Initialize Evaluator with a metric and model."""
         super().__init__(metric, model, output_dir)
-        if not isinstance(model, BaseFlowJudgeModel):
-            raise ValueError("Invalid model type. Use BaseFlowJudgeModel or its subclasses.")
+        if not isinstance(model, BaseEvaluatorModel):
+            raise ValueError("Invalid model type. Use BaseEvaluatorModel or its subclasses.")
 
     def evaluate(self, eval_input: EvalInput, save_results: bool = False) -> EvalOutput:
         """Evaluate a single EvalInput object."""
@@ -115,19 +115,19 @@ class FlowJudge(BaseFlowJudge):
         return eval_outputs
 
 
-class AsyncFlowJudge(BaseFlowJudge):
-    """Asynchronous FlowJudge class for evaluating AI outputs."""
+class AsyncEvaluator(BaseEvaluator):
+    """Asynchronous Evaluator class for evaluating AI outputs."""
 
     def __init__(
         self,
         metric: Metric | CustomMetric,
-        model: AsyncBaseFlowJudgeModel,
+        model: AsyncBaseEvaluatorModel,
         output_dir: str | None = "output/",
     ):
-        """Initialize AsyncFlowJudge with a metric and model."""
+        """Initialize AsyncEvaluator with a metric and model."""
         super().__init__(metric, model, output_dir)
-        if not isinstance(model, AsyncBaseFlowJudgeModel):
-            raise ValueError("Invalid model type. Use AsyncBaseFlowJudgeModel or its subclasses.")
+        if not isinstance(model, AsyncBaseEvaluatorModel):
+            raise ValueError("Invalid model type. Use AsyncBaseEvaluatorModel or its subclasses.")
 
     # ! FIXME: This should probably be handled somewhere else since only applies to Baseten
     def _handle_batch_result(
@@ -180,7 +180,7 @@ class AsyncFlowJudge(BaseFlowJudge):
             result = await self.model._async_generate(prompt)
             response = result
 
-            if isinstance(result, FlowJudgeError):
+            if isinstance(result, EvaluatorError):
                 logger.error(f" {result.error_type}: {result.error_message}")
                 return
 

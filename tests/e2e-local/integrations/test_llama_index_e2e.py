@@ -10,7 +10,7 @@ import pytest
 from llama_index.core import VectorStoreIndex
 from llama_index.core.llama_dataset import download_llama_dataset
 
-from flow_eval.integrations.llama_index import LlamaIndexFlowJudge
+from flow_eval.integrations.llama_index import LlamaIndexEvaluator
 from flow_eval.metrics import CustomMetric, RubricItem
 from flow_eval.models import Vllm
 
@@ -211,7 +211,7 @@ def correctness_metric():
 async def test_correctness_evaluation(
     correctness_metric, query, reference, response, test_cache_dir
 ):
-    """Tests the correctness evaluation of a generated response using LlamaIndexFlowJudge.
+    """Tests the correctness evaluation of a generated response using LlamaIndexEvaluator.
 
     Args:
         correctness_metric (CustomMetric): The metric used for evaluation.
@@ -231,7 +231,7 @@ async def test_correctness_evaluation(
         quantized=True,
         download_dir=str(test_cache_dir),
     )
-    flow_eval_evaluator = LlamaIndexFlowJudge(
+    flow_eval_evaluator = LlamaIndexEvaluator(
         model=model, metric=correctness_metric, save_results=True
     )
     result = await flow_eval_evaluator.aevaluate(
@@ -283,7 +283,7 @@ def compare_distributions(
 
 @pytest.mark.asyncio
 async def test_batch_evaluation(correctness_metric, query, reference, response, test_cache_dir):
-    """Performs a batch evaluation of queries using LlamaIndexFlowJudge and analyzes results."""
+    """Performs a batch evaluation of queries using LlamaIndexEvaluator and analyzes results."""
     os.environ["HF_HOME"] = str(test_cache_dir)
     model = None
     flow_eval_correctness = None
@@ -300,14 +300,14 @@ async def test_batch_evaluation(correctness_metric, query, reference, response, 
         )
         logging.info("Vllm model initialized")
 
-        logging.info("Initializing LlamaIndexFlowJudge")
-        flow_eval_correctness = LlamaIndexFlowJudge(
+        logging.info("Initializing LlamaIndexEvaluator")
+        flow_eval_correctness = LlamaIndexEvaluator(
             model=model,
             metric=correctness_metric,
             output_dir=str(test_cache_dir),
             save_results=True,
         )
-        logging.info("LlamaIndexFlowJudge initialized")
+        logging.info("LlamaIndexEvaluator initialized")
 
         logging.info("Downloading and preparing dataset")
         rag_dataset, documents = await asyncio.to_thread(
