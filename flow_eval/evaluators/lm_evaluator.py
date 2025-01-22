@@ -2,85 +2,46 @@ import asyncio
 import logging
 
 from flow_eval.eval_data_types import EvalInput, EvalOutput
-from flow_eval.metrics import CustomMetric, Metric
+from flow_eval.evals.lm_eval import LMEval
+from flow_eval.evaluators.base import AsyncBaseEvaluator, BaseEvaluator
 from flow_eval.models.adapters.baseten.data_io import BatchResult
 from flow_eval.models.adapters.baseten.errors import EvaluatorError
 from flow_eval.models.common import AsyncBaseEvaluatorModel, BaseEvaluatorModel
 from flow_eval.utils.prompt_formatter import format_rubric, format_user_prompt, format_vars
-from flow_eval.utils.result_writer import write_results_to_disk
-from flow_eval.utils.validators import validate_eval_input
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
-class BaseEvaluator:
-    """Base class for Evaluator with common functionality."""
+class LMEvaluator(BaseEvaluator):
+    """Evaluator using LLM-based evaluation specifications."""
 
     def __init__(
         self,
-        metric: Metric | CustomMetric,
-        model: BaseEvaluatorModel | AsyncBaseEvaluatorModel,
+        eval: LMEval,
+        model: BaseEvaluatorModel,
         output_dir: str | None = "output/",
     ):
-        """Initialize BaseEvaluator with a metric and model."""
-        if not isinstance(metric, (Metric, CustomMetric)):
-            raise ValueError("Invalid metric type. Use Metric or CustomMetric.")
-        self.metric = metric
-        self.output_dir = output_dir
+        """Initialize LMEvaluator with an eval specification and model."""
+        super().__init__(output_dir)
+        self.eval = eval
         self.model = model
 
+    # TODO - How to handle expected output?
     def _format_prompt(self, eval_input: EvalInput) -> str:
         """Format the prompt for a single evaluation input."""
         prompt_variables = {
             "INPUTS": format_vars(eval_input.inputs),
             "OUTPUT": format_vars([eval_input.output]),
-            "EVALUATION_CRITERIA": self.metric.criteria,
-            "RUBRIC": format_rubric(self.metric.rubric),
+            "EVALUATION_CRITERIA": self.eval.criteria,
+            "RUBRIC": format_rubric(self.eval.rubric),
         }
         return format_user_prompt(prompt_variables)
-
-    def _validate_inputs(self, eval_inputs: EvalInput | list[EvalInput]):
-        """Validate required inputs and output against the metric."""
-        if isinstance(eval_inputs, list):
-            for eval_input in eval_inputs:
-                validate_eval_input(eval_input, self.metric)
-        else:
-            validate_eval_input(eval_inputs, self.metric)
-
-    def _save_results(
-        self, eval_inputs: list[EvalInput], eval_outputs: list[EvalOutput], append: bool = False
-    ):
-        """Save results to disk."""
-        logger.info(f"{'Appending' if append else 'Saving'} results to {self.output_dir}")
-        write_results_to_disk(
-            eval_inputs,
-            eval_outputs,
-            self.model.metadata,
-            self.metric.name,
-            self.output_dir,
-            append=append,
-        )
-
-
-class Evaluator(BaseEvaluator):
-    """Synchronous Evaluator class for evaluating AI outputs."""
-
-    def __init__(
-        self,
-        metric: Metric | CustomMetric,
-        model: BaseEvaluatorModel,
-        output_dir: str | None = "output/",
-    ):
-        """Initialize Evaluator with a metric and model."""
-        super().__init__(metric, model, output_dir)
-        if not isinstance(model, BaseEvaluatorModel):
-            raise ValueError("Invalid model type. Use BaseEvaluatorModel or its subclasses.")
 
     def evaluate(self, eval_input: EvalInput, save_results: bool = False) -> EvalOutput:
         """Evaluate a single EvalInput object."""
         try:
-            self._validate_inputs(eval_input)
+            self.eval.validate_input(eval_input)
             prompt = self._format_prompt(eval_input)
             response = self.model._generate(prompt)
             eval_output = EvalOutput.parse(response)
@@ -99,7 +60,9 @@ class Evaluator(BaseEvaluator):
         fail_on_parse_error: bool = False,
     ) -> list[EvalOutput]:
         """Batch evaluate a list of EvalInput objects."""
-        self._validate_inputs(eval_inputs)
+        for eval_input in eval_inputs:
+            self.eval.validate_input(eval_input)
+
         prompts = [self._format_prompt(eval_input) for eval_input in eval_inputs]
         responses = self.model._batch_generate(prompts, use_tqdm=use_tqdm)
         eval_outputs = [
@@ -115,21 +78,31 @@ class Evaluator(BaseEvaluator):
         return eval_outputs
 
 
-class AsyncEvaluator(BaseEvaluator):
-    """Asynchronous Evaluator class for evaluating AI outputs."""
+class AsyncLMEvaluator(AsyncBaseEvaluator):
+    """Asynchronous evaluator using LLM-based evaluation specifications."""
 
     def __init__(
         self,
-        metric: Metric | CustomMetric,
+        eval: LMEval,
         model: AsyncBaseEvaluatorModel,
         output_dir: str | None = "output/",
     ):
-        """Initialize AsyncEvaluator with a metric and model."""
-        super().__init__(metric, model, output_dir)
-        if not isinstance(model, AsyncBaseEvaluatorModel):
-            raise ValueError("Invalid model type. Use AsyncBaseEvaluatorModel or its subclasses.")
+        """Initialize AsyncLMEvaluator with an eval specification and model."""
+        super().__init__(output_dir)
+        self.eval = eval
+        self.model = model
 
-    # ! FIXME: This should probably be handled somewhere else since only applies to Baseten
+    # TODO - How to handle expected output?
+    def _format_prompt(self, eval_input: EvalInput) -> str:
+        """Format the prompt for a single evaluation input."""
+        prompt_variables = {
+            "INPUTS": format_vars(eval_input.inputs),
+            "OUTPUT": format_vars([eval_input.output]),
+            "EVALUATION_CRITERIA": self.eval.criteria,
+            "RUBRIC": format_rubric(self.eval.rubric),
+        }
+        return format_user_prompt(prompt_variables)
+
     def _handle_batch_result(
         self, batch_result: BatchResult, batch_len: int, fail_on_parse_error: bool
     ) -> list[EvalOutput]:
@@ -148,7 +121,6 @@ class AsyncEvaluator(BaseEvaluator):
             for the eval outputs. We implement retry strategies where we can, but in
             certain instances (such as network failures) errors are inevitable.
             To ascertain predictability, we 'fill-in' the errors with empty EvalOutputs.
-
         """
         eval_outputs = [EvalOutput(feedback="BasetenError", score=None)] * batch_len
         for output in batch_result.successful_outputs:
@@ -175,16 +147,15 @@ class AsyncEvaluator(BaseEvaluator):
     ) -> EvalOutput | None:
         """Evaluate a single EvalInput object asynchronously."""
         try:
-            self._validate_inputs(eval_input)
+            self.eval.validate_input(eval_input)
             prompt = self._format_prompt(eval_input)
             result = await self.model._async_generate(prompt)
-            response = result
 
             if isinstance(result, EvaluatorError):
                 logger.error(f" {result.error_type}: {result.error_message}")
                 return
 
-            eval_output = EvalOutput.parse(response)
+            eval_output = EvalOutput.parse(result)
             if save_results:
                 logger.info(f"Saving result {'(append)' if append else '(overwrite)'}")
                 await asyncio.to_thread(
@@ -201,11 +172,13 @@ class AsyncEvaluator(BaseEvaluator):
         eval_inputs: list[EvalInput],
         use_tqdm: bool = True,
         save_results: bool = True,
-        append: bool = False,  # Change default to False
+        append: bool = False,
         fail_on_parse_error: bool = False,
     ) -> list[EvalOutput]:
         """Batch evaluate a list of EvalInput objects asynchronously."""
-        self._validate_inputs(eval_inputs)
+        for eval_input in eval_inputs:
+            self.eval.validate_input(eval_input)
+
         prompts = [self._format_prompt(eval_input) for eval_input in eval_inputs]
         batch_result = await self.model._async_batch_generate(prompts, use_tqdm=use_tqdm)
 

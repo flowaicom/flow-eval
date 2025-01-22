@@ -1,7 +1,9 @@
-from .metric import Metric, RubricItem
+"""Preset LLM evaluations."""
 
-# Pre-defined metrics
-RESPONSE_CORRECTNESS_BINARY = Metric(
+from flow_eval.evals.lm_eval import LMEval, RubricItem
+
+# Pre-defined LLM evaluations
+RESPONSE_CORRECTNESS_BINARY = LMEval(
     name="Response Correctness (Binary)",
     criteria="""Does the generated response accurately match the provided reference answer \
 for the given query?""",
@@ -21,11 +23,11 @@ from the reference with no inaccuracies, extra details, or missing details. The 
 by the generated response is equivalent to the reference.""",
         ),
     ],
-    required_inputs=["query", "reference_answer"],
-    required_output="response",
+    input_columns=["query", "reference_answer"],
+    output_column="response",
 )
 
-RESPONSE_CORRECTNESS_3POINT = Metric(
+RESPONSE_CORRECTNESS_3POINT = LMEval(
     name="Response Correctness (3-point Likert)",
     criteria="""\
 Based on the provided reference response, how well does the system's generated response match the \
@@ -51,11 +53,11 @@ the query, containing all the relevant information from the reference without an
 extraneous details.""",
         ),
     ],
-    required_inputs=["query", "reference_answer"],
-    required_output="response",
+    input_columns=["query", "reference_answer"],
+    output_column="response",
 )
 
-RESPONSE_CORRECTNESS_5POINT = Metric(
+RESPONSE_CORRECTNESS_5POINT = LMEval(
     name="Response Correctness (5-point Likert)",
     criteria="""\
 Compare the system's response to the provided reference answer and rate how well they match in \
@@ -92,11 +94,11 @@ The response perfectly matches the accuracy and level of detail of the reference
 containing all key information to comprehensively answer the query.""",
         ),
     ],
-    required_inputs=["query", "reference_answer"],
-    required_output="response",
+    input_columns=["query", "reference_answer"],
+    output_column="response",
 )
 
-RESPONSE_FAITHFULNESS_BINARY = Metric(
+RESPONSE_FAITHFULNESS_BINARY = LMEval(
     name="Response Faithfulness (Binary)",
     criteria="""\
 Based on the provided context, does the response contain only information that is supported by or \
@@ -117,11 +119,11 @@ inferable from the provided context. There is no hallucinated or fabricated info
 the response that cannot be traced back to or deduced from the context.""",
         ),
     ],
-    required_inputs=["query", "context"],
-    required_output="response",
+    input_columns=["query", "context"],
+    output_column="response",
 )
 
-RESPONSE_FAITHFULNESS_3POINT = Metric(
+RESPONSE_FAITHFULNESS_3POINT = LMEval(
     name="Response Faithfulness (3-point Likert)",
     criteria="""\
 Based on the provided context, assess how faithful and consistent the response is to the \
@@ -150,11 +152,11 @@ claims are directly supported by the information given, without any hallucinated
 content present. The response accurately represents only the facts in the context.""",
         ),
     ],
-    required_inputs=["query", "context"],
-    required_output="response",
+    input_columns=["query", "context"],
+    output_column="response",
 )
 
-RESPONSE_FAITHFULNESS_5POINT = Metric(
+RESPONSE_FAITHFULNESS_5POINT = LMEval(
     name="Response Faithfulness (5-point Likert)",
     criteria="""\
 Based on the given context, evaluate how consistent and faithful the generated response is to the \
@@ -197,11 +199,11 @@ the response are directly supported by the context, without any hallucinated or 
 information.""",
         ),
     ],
-    required_inputs=["query", "context"],
-    required_output="response",
+    input_columns=["query", "context"],
+    output_column="response",
 )
 
-RESPONSE_RELEVANCE_BINARY = Metric(
+RESPONSE_RELEVANCE_BINARY = LMEval(
     name="Response Relevance (Binary)",
     criteria="""\
 Is the response directly relevant to answering the query considering the context, without \
@@ -222,11 +224,11 @@ answering the question asked, without going off-topic or providing unnecessary a
 information beyond what the query requires.""",
         ),
     ],
-    required_inputs=["query", "context"],
-    required_output="response",
+    input_columns=["query", "context"],
+    output_column="response",
 )
 
-RESPONSE_RELEVANCE_3POINT = Metric(
+RESPONSE_RELEVANCE_3POINT = LMEval(
     name="Response Relevance (3-point Likert)",
     criteria="""\
 How relevant and pertinent is the response to addressing the given query, without including \
@@ -254,11 +256,11 @@ comprehensively answer the query. No irrelevant or extraneous information is inc
 response is fully pertinent to the query.""",
         ),
     ],
-    required_inputs=["query", "context"],
-    required_output="response",
+    input_columns=["query", "context"],
+    output_column="response",
 )
 
-RESPONSE_RELEVANCE_5POINT = Metric(
+RESPONSE_RELEVANCE_5POINT = LMEval(
     name="Response Relevance (5-point Likert)",
     criteria="""\
 How well does the response address the query, providing relevant information without including \
@@ -295,13 +297,13 @@ The response is highly relevant to the query, addressing all key aspects directl
 without any irrelevant or extraneous information.""",
         ),
     ],
-    required_inputs=["query", "context"],
-    required_output="response",
+    input_columns=["query", "context"],
+    output_column="response",
 )
 
 
-def list_all_metrics():
-    """List all metric variable names."""
+def list_all_lm_evals():
+    """List all LM eval variable names."""
     return [
-        name for name, value in globals().items() if isinstance(value, Metric) and name.isupper()
+        name for name, value in globals().items() if isinstance(value, LMEval) and name.isupper()
     ]

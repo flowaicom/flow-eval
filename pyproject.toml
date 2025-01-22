@@ -76,7 +76,7 @@ openai = [
 Homepage = "https://github.com/flowaicom"
 
 [tool.setuptools]
-packages = ["flow_eval", "flow_eval.integrations", "flow_eval.metrics", "flow_eval.models", "flow_eval.utils"]
+packages = ["flow_eval", "flow_eval.integrations", "flow_eval.evaluators", "flow_eval.evals", "flow_eval.models", "flow_eval.utils"]
 
 [tool.setuptools.package-data]
 "flow_eval.models" = ["adapters/baseten/**/*.yaml"]

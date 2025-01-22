@@ -1,8 +1,16 @@
+"""Flow-eval: A comprehensive evaluation framework for LLMs."""
+
 from importlib.metadata import PackageNotFoundError, version
 
 from flow_eval.eval_data_types import EvalInput, EvalOutput
-from flow_eval.flow_eval import AsyncEvaluator, Evaluator
-from flow_eval.metrics import CustomMetric, Metric, RubricItem, list_all_metrics
+from flow_eval.evals import LMEval
+from flow_eval.evals.templates.lm_evals import list_all_lm_evals
+from flow_eval.evaluators import (
+    AnswerSimilarityEvaluator,
+    AsyncLMEvaluator,
+    FunctionEvaluator,
+    LMEvaluator,
+)
 from flow_eval.models.common import BaseEvaluatorModel
 from flow_eval.utils.prompt_formatter import format_rubric, format_user_prompt, format_vars
 
@@ -13,17 +21,19 @@ except PackageNotFoundError:
     __version__ = "unknown"
 
 __all__ = [
-    "Evaluator",
-    "AsyncEvaluator",
+    # Core data types
     "EvalInput",
-    "format_vars",
-    "format_rubric",
-    "format_user_prompt",
-    "RubricItem",
-    "Metric",
-    "CustomMetric",
-    "BaseEvaluatorModel",
     "EvalOutput",
+    # Evaluators
+    "LMEvaluator",
+    "AsyncLMEvaluator",
+    "AnswerSimilarityEvaluator",
+    "FunctionEvaluator",
+    # Eval specifications
+    "LMEval",
+    "RubricItem",
+    # Models
+    "BaseEvaluatorModel",
 ]
 
 # Conditional imports for optional dependencies
@@ -82,4 +92,4 @@ def get_available_models():
 __all__.append("get_available_models")
 
 # Add all metric names to __all__
-__all__ += list_all_metrics()
+__all__ += list_all_lm_evals()

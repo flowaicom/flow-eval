@@ -1,6 +1,6 @@
 from typing import Any
 
-from flow_eval.metrics.metric import RubricItem
+from flow_eval.evals.lm_eval import RubricItem
 
 USER_PROMPT_TEMPLATE = """# GOAL
 Your job is to evaluate a task carried out by an AI system powered by a large \
