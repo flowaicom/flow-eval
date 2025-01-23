@@ -76,10 +76,10 @@ openai = [
 Homepage = "https://github.com/flowaicom"
 
 [tool.setuptools]
-packages = ["flow_eval", "flow_eval.integrations", "flow_eval.evaluators", "flow_eval.evals", "flow_eval.models", "flow_eval.utils"]
+packages = { find = { where = ["."], include = ["flow_eval*"] } }
 
 [tool.setuptools.package-data]
-"flow_eval.models" = ["adapters/baseten/**/*.yaml"]
+"flow_eval.lm.models" = ["adapters/baseten/**/*.yaml"]
 
 [tool.setuptools_scm]
 version_scheme = "python-simplified-semver"

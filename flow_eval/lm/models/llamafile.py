@@ -14,7 +14,7 @@ from typing import Any
 import requests
 from tqdm import tqdm
 
-from flow_eval.models.common import (
+from .common import (
     AsyncBaseEvaluatorModel,
     BaseEvaluatorModel,
     GenerationParams,

@@ -1,6 +1,6 @@
 """Preset LLM evaluations."""
 
-from flow_eval.evals.lm_eval import LMEval, RubricItem
+from flow_eval.lm import LMEval, RubricItem
 
 # Pre-defined LLM evaluations
 RESPONSE_CORRECTNESS_BINARY = LMEval(

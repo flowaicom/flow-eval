@@ -3,8 +3,7 @@ from collections.abc import Callable
 from inspect import signature
 from typing import Any, get_type_hints
 
-from flow_eval.eval_data_types import EvalInput, EvalOutput
-from flow_eval.evaluators.base import BaseEvaluator
+from flow_eval.core import BaseEvaluator, EvalInput, EvalOutput
 
 logger = logging.getLogger(__name__)
 
@@ -22,7 +21,6 @@ class FunctionEvaluator(BaseEvaluator):
         result = evaluator.evaluate(eval_input)
     """
 
-    # FIXME: What about inputs that are not inputs but more like criteria? e.g. keywords
     def __init__(
         self,
         fn: Callable[..., Any],
@@ -97,7 +95,9 @@ class FunctionEvaluator(BaseEvaluator):
             eval_output = EvalOutput(score=score)
 
             if save_results:
-                self._save_results([eval_input], [eval_output])
+                self._save_results(
+                    [eval_input], [eval_output], {"function": self.fn.__name__}, self.fn.__name__
+                )
 
             return eval_output
         except Exception as e:
@@ -117,7 +117,13 @@ class FunctionEvaluator(BaseEvaluator):
                 eval_outputs.append(eval_output)
 
             if save_results:
-                self._save_results(eval_inputs, eval_outputs)
+                self._save_results(
+                    eval_inputs=eval_inputs,
+                    eval_outputs=eval_outputs,
+                    metadata={"model_id": f"function-{self.fn.__name__}", "model_type": "function"},
+                    eval_name=self.fn.__name__,
+                    append=False,
+                )
 
             return eval_outputs
         except Exception as e:

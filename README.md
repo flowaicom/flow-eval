@@ -32,10 +32,11 @@
 <a href="https://app.fossa.com/projects/git%2Bgithub.com%2Fflowaicom%2Fflow-eval?ref=badge_shield" alt="FOSSA Status"><img src="https://app.fossa.com/api/projects/git%2Bgithub.com%2Fflowaicom%2Fflow-eval.svg?type=shield"/></a>
 </p>
 
+`flow-eval` is an evaluation library for LLM applications that support LLM-as-a-judge, functions and similarity-based evaluation. It provides flexible evals, multiple inference backends, and seamless integration with popular frameworks.
 
 ## Installation
 
-Install flow-eval using pip:
+Install `flow-eval` using pip:
 
 ```bash
 pip install -e ".[vllm,hf]"
@@ -54,8 +55,10 @@ Extras available:
 Here's a simple example to get you started:
 
 ```python
-from flow_eval import Vllm, Llamafile, Hf, EvalInput, FlowJudge
-from flow_eval.metrics import RESPONSE_FAITHFULNESS_5POINT
+from flow_eval import LMEvaluator
+from flow_eval.lm.models import Vllm, Llamafile, Hf
+from flow_eval.core import EvalInput
+from flow_eval.lm.metrics import RESPONSE_FAITHFULNESS_5POINT
 from IPython.display import Markdown, display
 
 # If you are running on an Ampere GPU or newer, create a model using VLLM
@@ -70,9 +73,9 @@ model = Vllm()
 # Or create a model using Llamafile if not running an Nvidia GPU & running a Silicon MacOS for example
 # model = Llamafile()
 
-# Initialize the judge
-faithfulness_judge = FlowJudge(
-    metric=RESPONSE_FAITHFULNESS_5POINT,
+# Initialize the evaluator
+faithfulness_evaluator = LMEvaluator(
+    eval=RESPONSE_FAITHFULNESS_5POINT,
     model=model
 )
 
@@ -92,7 +95,7 @@ eval_input = EvalInput(
 )
 
 # Run the evaluation
-result = faithfulness_judge.evaluate(eval_input, save_results=False)
+result = faithfulness_evaluator.evaluate(eval_input, save_results=False)
 
 # Display the result
 display(Markdown(f"__Feedback:__\n{result.feedback}\n\n__Score:__\n{result.score}"))
@@ -110,7 +113,7 @@ The library supports multiple inference backends to accommodate different hardwa
    - Requires CUDA-compatible GPU
 
    ```python
-   from flow_eval import Vllm
+   from flow_eval.lm.models import Vllm
 
    model = Vllm()
    ```
@@ -122,14 +125,14 @@ The library supports multiple inference backends to accommodate different hardwa
 
     If you are running on an Ampere GPU or newer:
    ```python
-   from flow_eval import Hf
+   from flow_eval.lm.models import Hf
 
    model = Hf()
    ```
 
    If you are not running on an Ampere GPU or newer, disable flash attention:
    ```python
-   from flow_eval import Hf
+   from flow_eval.lm.models import Hf
 
    model = Hf(flash_attn=False)
    ```
@@ -140,7 +143,7 @@ The library supports multiple inference backends to accommodate different hardwa
    - Self-contained, easy to deploy option
 
    ```python
-   from flow_eval import Llamafile
+   from flow_eval.lm.models import Llamafile
 
    model = Llamafile()
    ```
@@ -151,7 +154,7 @@ The library supports multiple inference backends to accommodate different hardwa
     - Improved concurrency patterns for larger workloads.
 
   ```python
-  from flow_eval import Baseten
+  from flow_eval.lm.models import Baseten
 
   model = Baseten()
   ```
@@ -160,18 +163,18 @@ The library supports multiple inference backends to accommodate different hardwa
 Choose the inference backend that best matches your hardware and performance requirements. The library provides a unified interface for all these options, making it easy to switch between them as needed.
 
 
-### Evaluation Metrics
+### Evals
 
 `Flow-eval-v0.1` was trained to handle any custom metric that can be expressed as a combination of evaluation criteria and rubric, and required inputs and outputs.
 
-#### Pre-defined Metrics
+#### Pre-defined Evals
 
 For convenience, `flow-eval` library comes with pre-defined metrics such as `RESPONSE_CORRECTNESS` or `RESPONSE_FAITHFULNESS`. You can check the full list by running:
 
 ```python
-from flow_eval.metrics import list_all_metrics
+from flow_eval import list_all_lm_evals
 
-list_all_metrics()
+list_all_lm_evals()
 ```
 
 ### Batched Evaluations
@@ -181,16 +184,18 @@ For efficient processing of multiple inputs, you can use the `batch_evaluate` me
 ```python
 # Read the sample data
 import json
-from flow_eval import Vllm, EvalInput, FlowJudge
-from flow_eval.metrics import RESPONSE_FAITHFULNESS_5POINT
+from flow_eval import LMEvaluator
+from flow_eval.core import EvalInput
+from flow_eval.lm.models import Vllm
+from flow_eval.lm.metrics import RESPONSE_FAITHFULNESS_5POINT
 from IPython.display import Markdown, display
 
 # Initialize the model
 model = Vllm()
 
-# Initialize the judge
-faithfulness_judge = FlowJudge(
-    metric=RESPONSE_FAITHFULNESS_5POINT,
+# Initialize the evaluator
+faithfulness_evaluator = LMEvaluator(
+    eval=RESPONSE_FAITHFULNESS_5POINT,
     model=model
 )
 
@@ -212,7 +217,7 @@ outputs_batch = [{"response": sample["response"]} for sample in data]
 eval_inputs_batch = [EvalInput(inputs=inputs, output=output) for inputs, output in zip(inputs_batch, outputs_batch)]
 
 # Run the batch evaluation
-results = faithfulness_judge.batch_evaluate(eval_inputs_batch, save_results=False)
+results = faithfulness_evaluator.batch_evaluate(eval_inputs_batch, save_results=False)
 
 # Visualizing the results
 for i, result in enumerate(results):
@@ -227,25 +232,25 @@ for i, result in enumerate(results):
 > There exists currently a reported issue with Phi-3 models that produces gibberish outputs with contexts longer than 4096 tokens, including input and output. This issue has been recently fixed in the transformers library so we recommend using the `Hf()` model configuration for longer contexts at the moment. For more details, refer to: [#33129](https://github.com/huggingface/transformers/pull/33129) and [#6135](https://github.com/vllm-project/vllm/issues/6135)
 
 
-### Custom Metrics
+### Custom Evals
 
 Create your own evaluation metrics:
 
 ```python
-from flow_eval.metrics import CustomMetric, RubricItem
+from flow_eval.lm import LMEval, RubricItem
 
-custom_metric = CustomMetric(
+custom_metric = LMEval(
     name="My Custom Metric",
     criteria="Evaluate based on X, Y, and Z.",
     rubric=[
         RubricItem(score=0, description="Poor performance"),
         RubricItem(score=1, description="Good performance"),
     ],
-    required_inputs=["query"],
-    required_output="response"
+    input_columns=["query"],
+    output_column="response"
 )
 
-judge = FlowJudge(metric=custom_metric, config="Flow-eval-v0.1-AWQ")
+evaluator = LMEvaluator(eval=custom_metric, config="Flow-eval-v0.1-AWQ")
 ```
 
 ### Integrations
@@ -366,4 +371,4 @@ This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENS
 
 ## Acknowledgments
 
-Flow-eval is developed and maintained by the Flow AI team. We appreciate the contributions and feedback from the AI community in making this tool more robust and versatile.
+`flow-eval` is developed and maintained by the Flow AI team. We appreciate the contributions and feedback from the AI community in making this tool more robust and versatile.

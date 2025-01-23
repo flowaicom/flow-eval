@@ -3,7 +3,7 @@ import os
 import warnings
 from typing import Any
 
-from flow_eval.models.common import (
+from .common import (
     AsyncBaseEvaluatorModel,
     BaseEvaluatorModel,
     ModelConfig,

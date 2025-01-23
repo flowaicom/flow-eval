@@ -1,7 +1,7 @@
 from pydantic import BaseModel, Field, field_validator
 from typing_extensions import TypedDict
 
-from flow_eval.models.adapters.baseten.errors import EvaluatorError
+from flow_eval.lm.models.adapters.baseten.errors import EvaluatorError
 
 
 class Message(TypedDict):

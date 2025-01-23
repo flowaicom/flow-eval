@@ -6,7 +6,7 @@ import openai
 import structlog
 from openai import AsyncOpenAI, OpenAI, OpenAIError
 
-from flow_eval.models.adapters.base import AsyncBaseAPIAdapter, BaseAPIAdapter
+from flow_eval.lm.models.adapters.base import AsyncBaseAPIAdapter, BaseAPIAdapter
 
 logger = structlog.get_logger(__name__)
 
@@ -61,12 +61,12 @@ class OpenAIAdapter(BaseAPIAdapter):
         outputs = []
         for message in request_messages:
             completion = self._make_request(message)
-        try:
-            outputs.append(completion.choices[0].message.content.strip())
-        except Exception as e:
-            logger.warning(f"Failed to parse model response: {e}")
-            logger.warning("Returning default value")
-            outputs.append("")
+            try:
+                outputs.append(completion.choices[0].message.content.strip())
+            except Exception as e:
+                logger.warning(f"Failed to extract model response: {e}")
+                logger.warning("Returning default value")
+                outputs.append("")
         return outputs
 
 

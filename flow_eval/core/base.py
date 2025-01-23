@@ -1,8 +1,8 @@
 import logging
 from abc import ABC, abstractmethod
 
-from flow_eval.eval_data_types import EvalInput, EvalOutput
-from flow_eval.utils.result_writer import write_results_to_disk
+from flow_eval.core.io import write_results_to_disk
+from flow_eval.core.types import EvalInput, EvalOutput
 
 logger = logging.getLogger(__name__)
 

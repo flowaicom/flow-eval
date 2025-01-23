@@ -1,17 +1,25 @@
+"""Core I/O operations for flow-eval."""
+
 import json
 import logging
 import re
 from datetime import datetime, timezone
 from enum import Enum
+from importlib.metadata import PackageNotFoundError, version
 from pathlib import Path
 from typing import Any
 
 from pydantic import BaseModel
 
-import flow_eval
-from flow_eval.eval_data_types import EvalInput, EvalOutput
+from flow_eval.core.types import EvalInput, EvalOutput
 
 logger = logging.getLogger(__name__)
+
+try:
+    __VERSION__ = version("flow-eval")
+except PackageNotFoundError:
+    # package is not installed
+    __VERSION__ = "unknown"
 
 
 def write_results_to_disk(
@@ -22,7 +30,7 @@ def write_results_to_disk(
     output_dir: str | Path,
     append: bool = False,
 ) -> None:
-    """Write evaluation results, inputs, and metadata to separate JSONL files.
+    """Write evaluation results, inputs, and metadata to separate JSON and JSONL files.
 
     This function processes evaluation data and writes it to disk in a structured format.
     It creates separate files for metadata and results, organizing them in directories
@@ -125,11 +133,8 @@ def _format_name(name: str) -> str:
         characters (except underscore and hyphen), and replaces non-ASCII
         characters with underscores.
     """
-    # Replace spaces with underscores
     name = name.replace(" ", "_")
-    # Remove any character that is not alphanumeric, underscore, or hyphen
     name = re.sub(r"[^\w\-]", "", name)
-    # Replace any non-ASCII character with underscore
     name = re.sub(r"[^\x00-\x7F]", "_", name)
     return name
 
@@ -183,7 +188,7 @@ def _prepare_metadata(model_metadata: dict[str, Any], timestamp: str) -> dict[st
         - Does not deep copy the input model_metadata.
     """
     metadata = {
-        "library_version": f"{flow_eval.__version__}",
+        "library_version": f"{__VERSION__}",
         "timestamp": timestamp,
         **model_metadata,
     }
@@ -212,38 +217,3 @@ def _write_json_file(path: Path, data: dict[str, Any]) -> None:
     """
     with path.open("w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
-
-
-def _write_results_file(
-    path: Path, eval_inputs: list[EvalInput], eval_outputs: list[EvalOutput], append: bool = False
-) -> None:
-    """Write results to a JSONL file.
-
-    Args:
-        path: Path to the output file.
-        eval_inputs: List of evaluation inputs.
-        eval_outputs: List of evaluation outputs.
-        append: If True, append to the file. If False, overwrite. Default is False.
-
-    Raises:
-        OSError: If there's an error writing to the file.
-        ValueError: If eval_inputs and eval_outputs have different lengths.
-
-    Note:
-        - Uses UTF-8 encoding.
-        - Appends to the file if append is True, otherwise overwrites.
-        - Each line in the file is a JSON object representing one result.
-        - Ensures non-ASCII characters are preserved in the output.
-    """
-    if len(eval_inputs) != len(eval_outputs):
-        raise ValueError("eval_inputs and eval_outputs must have the same length")
-
-    mode = "a" if append else "w"
-    with path.open(mode, encoding="utf-8") as f:
-        for input_data, eval_output in zip(eval_inputs, eval_outputs, strict=True):
-            result = {
-                "sample": input_data.model_dump(),
-                "feedback": eval_output.feedback,
-                "score": eval_output.score,
-            }
-            f.write(json.dumps(result, ensure_ascii=False) + "\n")

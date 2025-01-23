@@ -1,8 +1,6 @@
-from abc import ABC
-
 from pydantic import BaseModel, Field
 
-from flow_eval.eval_data_types import EvalInput
+from flow_eval.core import EvalInput
 
 
 class RubricItem(BaseModel):
@@ -12,7 +10,7 @@ class RubricItem(BaseModel):
     description: str
 
 
-class LMEval(BaseModel, ABC):
+class LMEval(BaseModel):
     """Specification for LM-based evaluation."""
 
     name: str
@@ -44,3 +42,15 @@ class LMEval(BaseModel, ABC):
             raise ValueError(
                 f"Required expected output '{self.expected_output_column}' not found in EvalInput"
             )
+
+    def keys(self) -> dict[str, list[str] | str | None]:
+        """Get the configured input and output columns.
+
+        Returns:
+            dict: A dictionary containing input_columns, output_column, and expected_output_column
+        """
+        return {
+            "input_columns": self.input_columns,
+            "output_column": self.output_column,
+            "expected_output_column": self.expected_output_column,
+        }

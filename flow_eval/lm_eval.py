@@ -1,13 +1,11 @@
 import asyncio
 import logging
 
-from flow_eval.eval_data_types import EvalInput, EvalOutput
-from flow_eval.evals.lm_eval import LMEval
-from flow_eval.evaluators.base import AsyncBaseEvaluator, BaseEvaluator
-from flow_eval.models.adapters.baseten.data_io import BatchResult
-from flow_eval.models.adapters.baseten.errors import EvaluatorError
-from flow_eval.models.common import AsyncBaseEvaluatorModel, BaseEvaluatorModel
-from flow_eval.utils.prompt_formatter import format_rubric, format_user_prompt, format_vars
+from flow_eval.core import AsyncBaseEvaluator, BaseEvaluator, EvalInput, EvalOutput
+from flow_eval.lm import AsyncBaseEvaluatorModel, BaseEvaluatorModel, LMEval
+from flow_eval.lm.models.adapters.baseten.data_io import BatchResult
+from flow_eval.lm.models.adapters.baseten.errors import EvaluatorError
+from flow_eval.lm.prompts import format_rubric, format_user_prompt, format_vars
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -46,7 +44,9 @@ class LMEvaluator(BaseEvaluator):
             response = self.model._generate(prompt)
             eval_output = EvalOutput.parse(response)
             if save_results:
-                self._save_results([eval_input], [eval_output])
+                self._save_results(
+                    [eval_input], [eval_output], self.model.metadata, self.eval.name, append=False
+                )
             return eval_output
         except Exception as e:
             logger.error(f"Evaluation failed: {e}")
@@ -71,7 +71,9 @@ class LMEvaluator(BaseEvaluator):
         ]
         parse_failures = sum(1 for output in eval_outputs if output.score == -1)
         if save_results:
-            self._save_results(eval_inputs, eval_outputs)
+            self._save_results(
+                eval_inputs, eval_outputs, self.model.metadata, self.eval.name, append=False
+            )
         if parse_failures > 0:
             logger.warning(f"Number of parsing failures: {parse_failures} out of {len(responses)}")
 
@@ -159,14 +161,18 @@ class AsyncLMEvaluator(AsyncBaseEvaluator):
             if save_results:
                 logger.info(f"Saving result {'(append)' if append else '(overwrite)'}")
                 await asyncio.to_thread(
-                    self._save_results, [eval_input], [eval_output], append=append
+                    self._save_results,
+                    [eval_input],
+                    [eval_output],
+                    self.model.metadata,
+                    self.eval.name,
+                    append=append,
                 )
             return eval_output
         except Exception as e:
             logger.error(f"Asynchronous evaluation failed: {e}")
             raise
 
-    # TODO: figure if we want to have the parser be passed the fail_on_parse_error flag
     async def async_batch_evaluate(
         self,
         eval_inputs: list[EvalInput],
@@ -197,15 +203,14 @@ class AsyncLMEvaluator(AsyncBaseEvaluator):
 
         if save_results:
             logger.info(f"Saving {len(eval_outputs)} results")
-            for i, (eval_input, eval_output) in enumerate(
-                zip(eval_inputs, eval_outputs, strict=True)
-            ):
-                await asyncio.to_thread(
-                    self._save_results,
-                    [eval_input],
-                    [eval_output],
-                    append=(append or i > 0),  # Append for all but the first, unless append is True
-                )
+            await asyncio.to_thread(
+                self._save_results,
+                eval_inputs,
+                eval_outputs,
+                self.model.metadata,
+                self.eval.name,
+                append=append,
+            )
 
         if parse_failures > 0:
             logger.warning(

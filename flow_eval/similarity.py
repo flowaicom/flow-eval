@@ -4,8 +4,7 @@ from typing import Literal
 import numpy as np
 from sentence_transformers import SentenceTransformer
 
-from flow_eval.eval_data_types import EvalInput, EvalOutput
-from flow_eval.evaluators.base import BaseEvaluator
+from flow_eval.core import BaseEvaluator, EvalInput, EvalOutput
 
 logger = logging.getLogger(__name__)
 
@@ -99,8 +98,8 @@ class AnswerSimilarityEvaluator(BaseEvaluator):
         super()._save_results(
             eval_inputs,
             eval_outputs,
-            {"model": self.model_name, "distance_fn": self.distance_fn},
-            "embedding_similarity",
+            {"model_id": f"similarity-{self.model_name}", "model_type": "embedding"},
+            "answer_similarity",
             append=append,
         )
 
@@ -117,7 +116,13 @@ class AnswerSimilarityEvaluator(BaseEvaluator):
             eval_output = EvalOutput(score=similarity)
 
             if save_results:
-                self._save_results([eval_input], [eval_output])
+                self._save_results(
+                    [eval_input],
+                    [eval_output],
+                    {"model_id": f"similarity-{self.model_name}", "model_type": "embedding"},
+                    "answer_similarity",
+                    append=False,
+                )
 
             return eval_output
         except Exception as e:
@@ -137,7 +142,13 @@ class AnswerSimilarityEvaluator(BaseEvaluator):
                 eval_outputs.append(eval_output)
 
             if save_results:
-                self._save_results(eval_inputs, eval_outputs)
+                self._save_results(
+                    eval_inputs,
+                    eval_outputs,
+                    {"model_id": f"similarity-{self.model_name}", "model_type": "embedding"},
+                    "answer_similarity",
+                    append=False,
+                )
 
             return eval_outputs
         except Exception as e:

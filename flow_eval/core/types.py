@@ -12,9 +12,9 @@ _PARSERS = {}
 class EvalInput(BaseModel):
     """Input model for an Evaluator."""
 
-    inputs: list[dict[str, str]] = Field(default_factory=list)
+    inputs: list[dict[str, str]] | None = Field(default_factory=list)
     output: dict[str, str]
-    expected_output: dict[str, str]
+    expected_output: dict[str, str] | None = Field(default_factory=dict)
 
 
 class EvalOutput(BaseModel):

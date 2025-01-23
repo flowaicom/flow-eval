@@ -3,7 +3,7 @@ import os
 import warnings
 from typing import Any
 
-from flow_eval.models.common import BaseEvaluatorModel, GenerationParams, ModelConfig, ModelType
+from .common import BaseEvaluatorModel, GenerationParams, ModelConfig, ModelType
 
 try:
     import torch
