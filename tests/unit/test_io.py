@@ -6,16 +6,15 @@ from typing import Any
 
 import pytest
 
-from flow_eval.eval_data_types import EvalInput, EvalOutput
-from flow_eval.utils.result_writer import (
+from flow_eval.core.io import (
     _format_name,
     _prepare_file_paths,
     _prepare_metadata,
     _validate_inputs,
     _write_json_file,
-    _write_results_file,
     write_results_to_disk,
 )
+from flow_eval.core.types import EvalInput, EvalOutput
 
 
 @pytest.fixture
@@ -67,7 +66,7 @@ def mock_datetime(monkeypatch: pytest.MonkeyPatch) -> None:
         def now(tz: timezone | None = None) -> datetime:
             return datetime(2023, 1, 1, tzinfo=timezone.utc)
 
-    monkeypatch.setattr("flow_eval.utils.result_writer.datetime", MockDatetime)
+    monkeypatch.setattr("flow_eval.core.io.datetime", MockDatetime)
 
 
 def test_write_results_to_disk(
@@ -339,30 +338,3 @@ def test_format_name_implementation():
     assert format_name("hello世界") == "hello__"
     assert format_name("123_abc-XYZ") == "123_abc-XYZ"
     assert format_name("!@#$%^&*()") == ""
-
-
-def test_write_results_file_unicode(tmp_path: Path) -> None:
-    """Test _write_results_file function with unicode characters.
-
-    This test ensures that the function correctly handles and preserves unicode
-    characters when writing to files, which is crucial for internationalization
-    and proper data representation.
-
-    Critical aspects tested:
-    - Unicode characters in both input content and feedback are preserved.
-    - The written file can be read back with unicode characters intact.
-    - The JSON encoding and decoding process handles unicode correctly.
-
-    :param tmp_path: Temporary directory path provided by pytest.
-    :type tmp_path: Path
-    """
-    unicode_inputs = [EvalInput(inputs=[{"prompt": "测试"}], output={"response": "テスト"})]
-    unicode_outputs = [EvalOutput(feedback="フィードバック", score=1)]
-    test_file = tmp_path / "test.jsonl"
-    _write_results_file(test_file, unicode_inputs, unicode_outputs)
-
-    with test_file.open(encoding="utf-8") as f:
-        content = json.loads(f.read())
-        assert content["sample"]["inputs"][0]["prompt"] == "测试"
-        assert content["sample"]["output"]["response"] == "テスト"
-        assert content["feedback"] == "フィードバック"

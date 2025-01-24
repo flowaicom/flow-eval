@@ -326,7 +326,12 @@ class LlamaIndexLMEvaluator(BaseEvaluator):
 
         if save_results:
             await asyncio.to_thread(
-                self.evaluator._save_results, eval_inputs, eval_outputs, append=False
+                self.evaluator._save_results,
+                eval_inputs,
+                eval_outputs,
+                metadata=self.model.metadata,
+                eval_name=self.eval.name,
+                append=False,
             )
 
         logger.info(f"Collected {len(results)} results")

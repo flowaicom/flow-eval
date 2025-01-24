@@ -11,9 +11,9 @@ from llama_index.core.evaluation import BatchEvalRunner
 from llama_index.core.llama_dataset import download_llama_dataset
 from pydantic import BaseModel
 
-from flow_eval import Baseten
-from flow_eval.integrations.llama_index import LlamaIndexEvaluator
-from flow_eval.metrics import CustomMetric, RubricItem
+from flow_eval.integrations.llama_index import LlamaIndexLMEvaluator
+from flow_eval.lm.models import Baseten
+from flow_eval.lm.types import LMEval, RubricItem
 
 pytest_plugins = ("pytest_asyncio",)
 
@@ -62,11 +62,11 @@ def test_cache_dir() -> Path:
 
 
 @pytest.fixture
-def correctness_metric() -> CustomMetric:
-    """Creates a CustomMetric for evaluating the correctness of generated answers.
+def correctness_metric() -> LMEval:
+    """Creates a LMEval for evaluating the correctness of generated answers.
 
     Returns:
-        CustomMetric: A metric object with evaluation criteria and rubric for
+        LMEval: A metric object with evaluation criteria and rubric for
         assessing answer correctness.
     """
     evaluation_criteria = "Is the generated answer relevant to the user query and reference answer?"
@@ -97,12 +97,12 @@ def correctness_metric() -> CustomMetric:
             "fully correct according to the reference answer.",
         ),
     ]
-    return CustomMetric(
+    return LMEval(
         name="correctness",
         criteria=evaluation_criteria,
         rubric=rubric,
-        required_inputs=["query", "reference"],
-        required_output="response",
+        input_columns=["query", "reference"],
+        output_column="response",
     )
 
 
@@ -145,7 +145,7 @@ def compare_distributions(
 
 
 async def batch_eval_runner(
-    evaluators: dict[str, LlamaIndexEvaluator],
+    evaluators: dict[str, LlamaIndexLMEvaluator],
     query_engine: Any,
     questions: list[str],
     reference: list[str] | None = None,
@@ -154,7 +154,7 @@ async def batch_eval_runner(
     """Runs batch evaluation using the provided evaluators and query engine.
 
     Args:
-        evaluators (Dict[str, LlamaIndexEvaluator]): Dictionary of evaluators.
+        evaluators (Dict[str, LlamaIndexLMEvaluator]): Dictionary of evaluators.
         query_engine (Any): The query engine to use for generating responses.
         questions (List[str]): List of questions to evaluate.
         reference (Optional[List[str]], optional): List of reference answers.
@@ -174,14 +174,14 @@ async def batch_eval_runner(
 @pytest.mark.asyncio
 async def test_baseten_correctness_evaluation(
     test_config: TestConfig,
-    correctness_metric: CustomMetric,
+    correctness_metric: LMEval,
     test_cache_dir: Path,
 ) -> None:
-    """Tests the correctness evaluation of Baseten model using LlamaIndexEvaluator.
+    """Tests the correctness evaluation of Baseten model using LlamaIndexLMEvaluator.
 
     Args:
         test_config (TestConfig): Test configuration object.
-        correctness_metric (CustomMetric): The metric used for evaluation.
+        correctness_metric (LMEval): The metric used for evaluation.
         test_cache_dir (Path): Temporary directory for test cache.
 
     Raises:
@@ -194,7 +194,7 @@ async def test_baseten_correctness_evaluation(
         exec_async=True,
         webhook_proxy_url=test_config.webhook_url,
     )
-    flow_eval_evaluator = LlamaIndexEvaluator(model=model, metric=correctness_metric)
+    flow_eval_evaluator = LlamaIndexLMEvaluator(model=model, eval=correctness_metric)
 
     # Download and prepare the dataset
     rag_dataset, documents = download_llama_dataset(
@@ -223,14 +223,14 @@ async def test_baseten_correctness_evaluation(
 @pytest.mark.asyncio
 async def test_baseten_batch_evaluation(
     test_config: TestConfig,
-    correctness_metric: CustomMetric,
+    correctness_metric: LMEval,
     test_cache_dir: Path,
 ) -> None:
     """Performs a batch evaluation of queries using Baseten model and analyzes results.
 
     Args:
         test_config (TestConfig): Test configuration object.
-        correctness_metric (CustomMetric): The metric used for evaluation.
+        correctness_metric (LMEval): The metric used for evaluation.
         test_cache_dir (Path): Temporary directory for test cache.
 
     Raises:
@@ -244,7 +244,7 @@ async def test_baseten_batch_evaluation(
     )
     logger.info("Starting test_baseten_batch_evaluation")
 
-    flow_eval_correctness = LlamaIndexEvaluator(model=model, metric=correctness_metric)
+    flow_eval_correctness = LlamaIndexLMEvaluator(model=model, eval=correctness_metric)
 
     # Download and prepare the dataset
     rag_dataset, documents = download_llama_dataset(

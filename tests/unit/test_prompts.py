@@ -1,15 +1,11 @@
-import pytest
-
-from flow_eval.eval_data_types import EvalInput
-from flow_eval.metrics import CustomMetric, RubricItem
-from flow_eval.utils.prompt_formatter import (
+from flow_eval.lm.prompts import (
     USER_PROMPT_NO_INPUTS_TEMPLATE,
     USER_PROMPT_TEMPLATE,
     format_rubric,
     format_user_prompt,
     format_vars,
 )
-from flow_eval.utils.validators import validate_eval_input
+from flow_eval.lm.types import RubricItem
 
 
 def test_format_vars():
@@ -52,24 +48,3 @@ def test_format_user_prompt():
         USER_PROMPT_NO_INPUTS_TEMPLATE.format(**variables_without_inputs)
         == formatted_without_inputs
     )
-
-
-def test_validate_eval_input():
-    """Test the validate_eval_input function."""
-    metric = CustomMetric(
-        name="Test Metric",
-        criteria="Test criteria",
-        rubric=[RubricItem(score=0, description="Bad"), RubricItem(score=1, description="Good")],
-        required_inputs=["test_input"],
-        required_output="test_output",
-    )
-    valid_input = EvalInput(
-        inputs=[{"test_input": "Test value"}], output={"test_output": "Test output"}
-    )
-    validate_eval_input(valid_input, metric)  # Should not raise an exception
-
-    invalid_input = EvalInput(
-        inputs=[{"wrong_input": "Test value"}], output={"test_output": "Test output"}
-    )
-    with pytest.raises(ValueError):
-        validate_eval_input(invalid_input, metric)

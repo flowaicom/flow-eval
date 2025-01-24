@@ -1,26 +1,27 @@
-from flow_eval.metrics import RESPONSE_CORRECTNESS_BINARY, CustomMetric, RubricItem
+from flow_eval.lm.metrics import RESPONSE_CORRECTNESS_BINARY
+from flow_eval.lm.types import LMEval, RubricItem
 
 
 def test_response_correctness_binary():
     """Test the RESPONSE_CORRECTNESS_BINARY metric."""
-    metric = RESPONSE_CORRECTNESS_BINARY
-    assert metric.name == "Response Correctness (Binary)"
-    assert len(metric.rubric) == 2
-    assert metric.required_inputs == ["query", "reference_answer"]
-    assert metric.required_output == "response"
+    eval = RESPONSE_CORRECTNESS_BINARY
+    assert eval.name == "Response Correctness (Binary)"
+    assert len(eval.rubric) == 2
+    assert eval.input_columns == ["query", "reference_answer"]
+    assert eval.output_column == "response"
 
 
 def test_custom_metric():
     """Test the CustomMetric class."""
-    custom_metric = CustomMetric(
+    eval = LMEval(
         name="Test Metric",
         criteria="Test criteria",
         rubric=[RubricItem(score=0, description="Bad"), RubricItem(score=1, description="Good")],
-        required_inputs=["test_input"],
-        required_output="test_output",
+        input_columns=["test_input"],
+        output_column="test_output",
     )
-    assert custom_metric.name == "Test Metric"
-    assert custom_metric.criteria == "Test criteria"
-    assert len(custom_metric.rubric) == 2
-    assert custom_metric.required_inputs == ["test_input"]
-    assert custom_metric.required_output == "test_output"
+    assert eval.name == "Test Metric"
+    assert eval.criteria == "Test criteria"
+    assert len(eval.rubric) == 2
+    assert eval.input_columns == ["test_input"]
+    assert eval.output_column == "test_output"

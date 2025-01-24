@@ -219,3 +219,24 @@ def cleanup(request, tmp_path):
     """Cleanup files and directories created during the test."""
     yield
     shutil.rmtree(tmp_path, ignore_errors=True)
+
+
+def test_validate_eval_input():
+    """Test the validate_eval_input function."""
+    eval = LMEval(
+        name="Test Metric",
+        criteria="Test criteria",
+        rubric=[RubricItem(score=0, description="Bad"), RubricItem(score=1, description="Good")],
+        input_columns=["test_input"],
+        output_column="test_output",
+    )
+    valid_input = EvalInput(
+        inputs=[{"test_input": "Test value"}], output={"test_output": "Test output"}
+    )
+    eval.validate_input(valid_input)  # Should not raise an exception
+
+    invalid_input = EvalInput(
+        inputs=[{"wrong_input": "Test value"}], output={"test_output": "Test output"}
+    )
+    with pytest.raises(ValueError):
+        eval.validate_input(invalid_input)

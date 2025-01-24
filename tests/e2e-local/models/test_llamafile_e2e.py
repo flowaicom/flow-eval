@@ -5,7 +5,7 @@ from pathlib import Path
 
 import pytest
 
-from flow_eval.models.llamafile import Llamafile
+from flow_eval.lm.models.llamafile import Llamafile
 
 # Set up logging with more detail
 logging.basicConfig(level=logging.DEBUG, format="%(asctime)s - %(levelname)s - %(message)s")

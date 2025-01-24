@@ -11,9 +11,9 @@ from hypothesis import given
 from hypothesis import strategies as st
 from pytest import LogCaptureFixture, MonkeyPatch
 
-from flow_eval.models.adapters.baseten.deploy import ensure_model_deployment
-from flow_eval.models.adapters.baseten.webhook import ensure_baseten_webhook_secret
-from flow_eval.models.baseten import (
+from flow_eval.lm.models.adapters.baseten.deploy import ensure_model_deployment
+from flow_eval.lm.models.adapters.baseten.webhook import ensure_baseten_webhook_secret
+from flow_eval.lm.models.baseten import (
     Baseten,
     BasetenError,
     BasetenModelConfig,
@@ -46,10 +46,10 @@ def test_ensure_model_deployment_key_exists(
 
     with caplog.at_level(logging.INFO):
         with patch(
-            "flow_eval.models.adapters.baseten.api_auth._validate_auth_status", return_value=True
+            "flow_eval.lm.models.adapters.baseten.api_auth._validate_auth_status", return_value=True
         ):
             with patch(
-                "flow_eval.models.adapters.baseten.deploy._initialize_model", return_value=True
+                "flow_eval.lm.models.adapters.baseten.deploy._initialize_model", return_value=True
             ):
                 result = ensure_model_deployment()
 
@@ -77,9 +77,12 @@ def test_ensure_model_deployment_key_missing_non_interactive(
 
     with caplog.at_level(logging.INFO):
         with patch(
-            "flow_eval.models.adapters.baseten.api_auth._validate_auth_status", return_value=False
+            "flow_eval.lm.models.adapters.baseten.api_auth._validate_auth_status",
+            return_value=False,
         ):
-            with patch("flow_eval.models.adapters.baseten.util.is_interactive", return_value=False):
+            with patch(
+                "flow_eval.lm.models.adapters.baseten.util.is_interactive", return_value=False
+            ):
                 result = ensure_model_deployment()
 
     sys.stdout = sys.__stdout__
@@ -112,21 +115,21 @@ def test_ensure_model_deployment_key_missing_interactive(
 
     with caplog.at_level(logging.INFO):
         with patch(
-            "flow_eval.models.adapters.baseten.api_auth._validate_auth_status",
+            "flow_eval.lm.models.adapters.baseten.api_auth._validate_auth_status",
             side_effect=[False, True],
         ):
             with patch(
-                "flow_eval.models.adapters.baseten.api_auth.is_interactive", return_value=True
+                "flow_eval.lm.models.adapters.baseten.api_auth.is_interactive", return_value=True
             ):
                 with patch(
-                    "flow_eval.models.adapters.baseten.api_auth.getpass.getpass",
+                    "flow_eval.lm.models.adapters.baseten.api_auth.getpass.getpass",
                     return_value="mock_api_key",
                 ):
                     with patch(
-                        "flow_eval.models.adapters.baseten.api_auth.truss.login"
+                        "flow_eval.lm.models.adapters.baseten.api_auth.truss.login"
                     ) as mock_login:
                         with patch(
-                            "flow_eval.models.adapters.baseten.deploy._initialize_model",
+                            "flow_eval.lm.models.adapters.baseten.deploy._initialize_model",
                             return_value=True,
                         ):
                             result = ensure_model_deployment()
@@ -296,7 +299,7 @@ def test_baseten_model_config_init_invalid(
     }
     test_params = {**valid_params, **invalid_input}
 
-    with patch("flow_eval.models.baseten.get_deployed_model_id", return_value="mock_model_id"):
+    with patch("flow_eval.lm.models.baseten.get_deployed_model_id", return_value="mock_model_id"):
         try:
             BasetenModelConfig(**valid_params)
         except Exception as e:
@@ -319,10 +322,10 @@ async def test_baseten_init_valid(
     :param caplog: pytest's log capture fixture
     """
     with (
-        patch("flow_eval.models.baseten.get_deployed_model_id", return_value="mock_model_id"),
-        patch("flow_eval.models.baseten.ensure_model_deployment", return_value=True),
+        patch("flow_eval.lm.models.baseten.get_deployed_model_id", return_value="mock_model_id"),
+        patch("flow_eval.lm.models.baseten.ensure_model_deployment", return_value=True),
         patch(
-            "flow_eval.models.adapters.baseten.webhook.ensure_baseten_webhook_secret",
+            "flow_eval.lm.models.adapters.baseten.webhook.ensure_baseten_webhook_secret",
             return_value=True,
         ),
     ):
@@ -360,10 +363,10 @@ async def test_baseten_init_valid(
         # Test asynchronous initialization without webhook secret
         monkeypatch.delenv("BASETEN_WEBHOOK_SECRET", raising=False)
     with (
-        patch("flow_eval.models.baseten.get_deployed_model_id", return_value="mock_model_id"),
-        patch("flow_eval.models.baseten.ensure_model_deployment", return_value=True),
+        patch("flow_eval.lm.models.baseten.get_deployed_model_id", return_value="mock_model_id"),
+        patch("flow_eval.lm.models.baseten.ensure_model_deployment", return_value=True),
         patch(
-            "flow_eval.models.baseten.ensure_baseten_webhook_secret",
+            "flow_eval.lm.models.baseten.ensure_baseten_webhook_secret",
             return_value=False,
         ),
     ):
@@ -391,21 +394,21 @@ async def test_baseten_init_valid(
         Baseten(exec_async=False, async_batch_size=0)
 
     with (
-        patch("flow_eval.models.baseten.ensure_model_deployment", return_value=False),
-        patch("flow_eval.models.baseten.get_deployed_model_id", return_value=None),
+        patch("flow_eval.lm.models.baseten.ensure_model_deployment", return_value=False),
+        patch("flow_eval.lm.models.baseten.get_deployed_model_id", return_value=None),
     ):
         with pytest.raises(BasetenError, match="Baseten deployment is not available"):
             Baseten(exec_async=False, async_batch_size=128)
 
     with (
-        patch("flow_eval.models.baseten.ensure_model_deployment", return_value=True),
-        patch("flow_eval.models.baseten.get_deployed_model_id", side_effect=[None, None]),
+        patch("flow_eval.lm.models.baseten.ensure_model_deployment", return_value=True),
+        patch("flow_eval.lm.models.baseten.get_deployed_model_id", side_effect=[None, None]),
     ):
         with pytest.raises(BasetenError, match="Unable to retrieve Baseten's deployed model id"):
             Baseten(exec_async=False, async_batch_size=128)
 
     # Test with custom _model_id
-    with patch("flow_eval.models.baseten.get_deployed_model_id", return_value=None):
+    with patch("flow_eval.lm.models.baseten.get_deployed_model_id", return_value=None):
         baseten_custom = Baseten(exec_async=False, async_batch_size=128, _model_id="custom_id")
         assert baseten_custom.config.model_id == "custom_id"
 
@@ -457,13 +460,13 @@ def test_ensure_baseten_webhook_secret(
 
     with caplog.at_level(logging.INFO):
         with patch(
-            "flow_eval.models.adapters.baseten.webhook._get_stored_secret"
+            "flow_eval.lm.models.adapters.baseten.webhook._get_stored_secret"
         ) as mock_get_stored:
             with patch(
-                "flow_eval.models.adapters.baseten.webhook.is_interactive"
+                "flow_eval.lm.models.adapters.baseten.webhook.is_interactive"
             ) as mock_interactive:
                 with patch("getpass.getpass", return_value="whsec_valid"):
-                    with patch("flow_eval.models.adapters.baseten.webhook._save_webhook_secret"):
+                    with patch("flow_eval.lm.models.adapters.baseten.webhook._save_webhook_secret"):
                         mock_get_stored.return_value = stored_secret
                         mock_interactive.return_value = is_interactive
                         result = ensure_baseten_webhook_secret()
@@ -496,8 +499,8 @@ def test_ensure_baseten_webhook_secret(
 def test_baseten_format_conversation() -> None:
     """Test the _format_conversation method of the Baseten class."""
     with (
-        patch("flow_eval.models.baseten.get_deployed_model_id", return_value="mock_model_id"),
-        patch("flow_eval.models.baseten.ensure_model_deployment", return_value=True),
+        patch("flow_eval.lm.models.baseten.get_deployed_model_id", return_value="mock_model_id"),
+        patch("flow_eval.lm.models.baseten.ensure_model_deployment", return_value=True),
     ):
         baseten = Baseten(_model_id="test_model")
         prompt = "Hello, world!"
@@ -519,10 +522,10 @@ async def test_baseten_generate_methods(caplog: pytest.LogCaptureFixture) -> Non
     :param caplog: pytest's log capture fixture
     """
     with (
-        patch("flow_eval.models.baseten.get_deployed_model_id", return_value="mock_model_id"),
-        patch("flow_eval.models.baseten.ensure_model_deployment", return_value=True),
+        patch("flow_eval.lm.models.baseten.get_deployed_model_id", return_value="mock_model_id"),
+        patch("flow_eval.lm.models.baseten.ensure_model_deployment", return_value=True),
         patch(
-            "flow_eval.models.adapters.baseten.webhook.ensure_baseten_webhook_secret",
+            "flow_eval.lm.models.adapters.baseten.webhook.ensure_baseten_webhook_secret",
             return_value=True,
         ),
         patch.dict(os.environ, {"BASETEN_WEBHOOK_SECRET": "whsec_mockwebhooksecret"}),
