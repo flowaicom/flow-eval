@@ -21,7 +21,7 @@ class EvalOutput(BaseModel):
     """Output model for evaluation results supporting multiple score types."""
 
     feedback: str | None = Field(None, description="Optional feedback from the evaluation")
-    score: int | bool | str | None = Field(
+    score: int | float | bool | str | None = Field(
         None, description="Evaluation result (numeric, boolean, or categorical)"
     )
 

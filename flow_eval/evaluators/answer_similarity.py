@@ -1,8 +1,7 @@
 import logging
 from typing import Literal
 
-import numpy as np
-from sentence_transformers import SentenceTransformer
+from sentence_transformers import SentenceTransformer, SimilarityFunction
 
 from flow_eval.eval_data_types import EvalInput, EvalOutput
 from flow_eval.evaluators.base import BaseEvaluator
@@ -23,50 +22,31 @@ class AnswerSimilarityEvaluator(BaseEvaluator):
 
     def __init__(
         self,
-        model_name: str,
-        distance_fn: Literal["cosine", "euclidean", "dot"] = "cosine",
-        normalize_embeddings: bool = True,
+        model_name: str = "all-MiniLM-L6-v2",
+        model_type: Literal["sentence-transformer"] = "sentence-transformer",
+        eval_name: str = "embedding_similarity",
+        similarity_fn_name: Literal["cosine", "dot", "euclidean", "manhattan"] = "cosine",
         output_dir: str | None = "output/",
     ):
-        """Initialize EmbeddingEvaluator.
-
-        Args:
-            model_name: Name of the sentence-transformers model to use
-            distance_fn: Distance function to use for similarity
-            normalize_embeddings: Whether to normalize embeddings before comparison
-            output_dir: Directory to save evaluation results
-        """
+        """Initialize EmbeddingEvaluator."""
         super().__init__(output_dir)
         self.model_name = model_name
-        self.distance_fn = distance_fn
-        self.normalize_embeddings = normalize_embeddings
-        self._model = None
-
-    @property
-    def model(self) -> SentenceTransformer:
-        """Lazy load the embedding model."""
-        if self._model is None:
-            self._model = SentenceTransformer(self.model_name)
-        return self._model
+        self.model_type = model_type
+        self.eval_name = eval_name
+        self.similarity_fn_name = getattr(SimilarityFunction, similarity_fn_name.upper())
+        self.model = SentenceTransformer(
+            self.model_name, similarity_fn_name=self.similarity_fn_name
+        )
 
     def _compute_similarity(self, text1: str, text2: str) -> float:
-        """Compute similarity between two texts."""
-        # Get embeddings
+        """Compute similarity between two texts using sentence-transformers similarity function."""
+        # Use sentence-transformers built-in similarity function
+        # (will handle normalization internally if needed for the chosen similarity function)
         emb1 = self.model.encode(text1)
         emb2 = self.model.encode(text2)
 
-        # Normalize if needed
-        if self.normalize_embeddings:
-            emb1 = emb1 / np.linalg.norm(emb1)
-            emb2 = emb2 / np.linalg.norm(emb2)
-
-        # Compute similarity
-        if self.distance_fn == "cosine":
-            return float(np.dot(emb1, emb2))
-        elif self.distance_fn == "euclidean":
-            return float(1 / (1 + np.linalg.norm(emb1 - emb2)))
-        else:  # dot product
-            return float(np.dot(emb1, emb2))
+        # Use sentence-transformers built-in similarity function
+        return float(self.model.similarity(emb1, emb2))
 
     def _extract_texts(self, eval_input: EvalInput) -> tuple[str, str]:
         """Extract the two texts to compare from EvalInput.
@@ -93,14 +73,21 @@ class AnswerSimilarityEvaluator(BaseEvaluator):
         return text1, text2
 
     def _save_results(
-        self, eval_inputs: list[EvalInput], eval_outputs: list[EvalOutput], append: bool = False
+        self,
+        eval_inputs: list[EvalInput],
+        eval_outputs: list[EvalOutput],
+        append: bool = False,
     ):
-        """Save results to disk."""
+        """Save results to disk with embedding-specific metadata."""
         super()._save_results(
             eval_inputs,
             eval_outputs,
-            {"model": self.model_name, "distance_fn": self.distance_fn},
-            "embedding_similarity",
+            {
+                "model_id": self.model_name,
+                "model_type": "sentence-transformer",
+                "similarity_fn_name": self.similarity_fn_name,
+            },
+            self.eval_name,
             append=append,
         )
 
