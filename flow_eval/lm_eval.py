@@ -20,8 +20,24 @@ class LMEvaluator(BaseEvaluator):
         model: BaseEvaluatorModel,
         output_dir: str | None = "output/",
     ):
-        """Initialize LMEvaluator with an eval specification and model."""
+        """Initialize LMEvaluator with an eval specification and model.
+
+        Args:
+            eval: LMEval specification object
+            model: BaseEvaluatorModel to use for evaluation
+            output_dir: Directory to save outputs
+
+        Raises:
+            ValueError: If eval is not an instance of
+            LMEval or model is not an instance of BaseEvaluatorModel
+        """
         super().__init__(output_dir)
+
+        if not isinstance(eval, LMEval):
+            raise ValueError("eval must be an instance of LMEval")
+        if not isinstance(model, BaseEvaluatorModel):
+            raise ValueError("model must be an instance of BaseEvaluatorModel")
+
         self.eval = eval
         self.model = model
 
@@ -89,8 +105,24 @@ class AsyncLMEvaluator(AsyncBaseEvaluator):
         model: AsyncBaseEvaluatorModel,
         output_dir: str | None = "output/",
     ):
-        """Initialize AsyncLMEvaluator with an eval specification and model."""
+        """Initialize AsyncLMEvaluator with an eval specification and model.
+
+        Args:
+            eval: LMEval specification object
+            model: Async model to use for evaluation
+            output_dir: Directory to save outputs
+
+        Raises:
+            ValueError: If eval is not an instance of
+            LMEval or model is not an instance of AsyncBaseEvaluatorModel
+        """
         super().__init__(output_dir)
+
+        if not isinstance(eval, LMEval):
+            raise ValueError("eval must be an instance of LMEval")
+        if not isinstance(model, AsyncBaseEvaluatorModel):
+            raise ValueError("model must be an instance of AsyncBaseEvaluatorModel")
+
         self.eval = eval
         self.model = model
 

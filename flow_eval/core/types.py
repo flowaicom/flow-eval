@@ -45,12 +45,15 @@ class EvalOutput(BaseModel):
             raise ValueError(f"Parser '{parser_name}' not registered")
 
         try:
-            return parser(response)
+            result = parser(response)
+            if not isinstance(result, EvalOutput):
+                raise ValueError(f"Parser returned {type(result)}, expected EvalOutput")
+            return result
         except Exception as e:
             if fail_on_parse_error:
                 raise ValueError(f"Parse error: {e}") from e
             logger.warning(f"Parse failed for response: {response}. Error: {e}")
-            return cls(feedback="Error", score=None)
+            return cls(feedback="Error", score=-1)
 
 
 # FIXME: Move to parsers
@@ -60,9 +63,14 @@ def default_parser(response: str) -> EvalOutput:
     score_match = re.search(r"<score>\s*([\d\.]+)\s*</score>", response)
     feedback_match = re.search(r"<feedback>\s*(.*?)\s*</feedback>", response, re.DOTALL)
 
+    if not score_match:
+        raise ValueError("No valid score found in response")
+    if not feedback_match:
+        raise ValueError("No valid feedback found in response")
+
     return EvalOutput(
-        feedback=feedback_match.group(1).strip() if feedback_match else None,
-        score=int(float(score_match.group(1))) if score_match else None,
+        feedback=feedback_match.group(1).strip(),
+        score=int(float(score_match.group(1))),
     )
 
 
@@ -74,12 +82,12 @@ def pairwise_parser(response: str) -> EvalOutput:
 
     if not choice_match:
         raise ValueError("No valid choice (A/B) found in response")
+    if not feedback_match:
+        raise ValueError("No valid feedback found in response")
 
     choice = choice_match.group(1).upper()
 
-    return EvalOutput(
-        feedback=feedback_match.group(1).strip() if feedback_match else None, score=choice
-    )
+    return EvalOutput(feedback=feedback_match.group(1).strip(), score=choice)
 
 
 @EvalOutput.register_parser("pairwise_bool")
@@ -90,10 +98,12 @@ def pairwise_bool_parser(response: str) -> EvalOutput:
 
     if not choice_match:
         raise ValueError("No valid choice (A/B) found in response")
+    if not feedback_match:
+        raise ValueError("No valid feedback found in response")
 
     choice = choice_match.group(1).upper()
 
     return EvalOutput(
-        feedback=feedback_match.group(1).strip() if feedback_match else None,
+        feedback=feedback_match.group(1).strip(),
         score=choice == "A",  # Returns True for A, False for B
     )

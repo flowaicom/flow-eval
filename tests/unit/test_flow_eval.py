@@ -3,14 +3,15 @@ from unittest.mock import patch
 
 import pytest
 
-from flow_eval.eval_data_types import EvalInput, EvalOutput
-from flow_eval.flow_eval import Evaluator
-from flow_eval.metrics import RESPONSE_CORRECTNESS_BINARY, CustomMetric, RubricItem
-from flow_eval.models.common import BaseEvaluatorModel
-from flow_eval.utils.prompt_formatter import USER_PROMPT_TEMPLATE, format_rubric, format_vars
+from flow_eval import LMEvaluator
+from flow_eval.core import EvalInput, EvalOutput
+from flow_eval.lm.metrics import RESPONSE_CORRECTNESS_BINARY
+from flow_eval.lm.models.common import BaseEvaluatorModel
+from flow_eval.lm.prompts import USER_PROMPT_TEMPLATE, format_rubric, format_vars
+from flow_eval.lm.types import LMEval, RubricItem
 
 
-class MockEvaluatorModel(BaseEvaluatorModel):
+class MockLMEvaluatorModel(BaseEvaluatorModel):
     """Mock model for testing."""
 
     def __init__(self, model_id, model_type, generation_params):
@@ -37,39 +38,39 @@ class MockEvaluatorModel(BaseEvaluatorModel):
 @pytest.fixture
 def mock_model():
     """Fixture to create a mock model for testing."""
-    return MockEvaluatorModel("test-model", "mock", {"temperature": 0.7})
+    return MockLMEvaluatorModel("test-model", "mock", {"temperature": 0.7})
 
 
 def test_flow_eval_initialization(mock_model):
-    """Test the initialization of Evaluator."""
-    judge = Evaluator(metric=RESPONSE_CORRECTNESS_BINARY, model=mock_model)
-    assert isinstance(judge, Evaluator)
-    assert judge.metric == RESPONSE_CORRECTNESS_BINARY
-    assert judge.model == mock_model
+    """Test the initialization of LMEvaluator."""
+    evaluator = LMEvaluator(eval=RESPONSE_CORRECTNESS_BINARY, model=mock_model)
+    assert isinstance(evaluator, LMEvaluator)
+    assert evaluator.eval == RESPONSE_CORRECTNESS_BINARY
+    assert evaluator.model == mock_model
 
 
 def test_flow_eval_initialization_invalid_metric():
-    """Test Evaluator initialization with invalid metric."""
+    """Test LMEvaluator initialization with invalid metric."""
     with pytest.raises(ValueError):
-        Evaluator(metric="invalid_metric", model=mock_model)
+        LMEvaluator(eval="invalid_metric", model=mock_model)
 
 
 def test_flow_eval_evaluate(mock_model):
-    """Test the evaluate method of Evaluator."""
-    judge = Evaluator(metric=RESPONSE_CORRECTNESS_BINARY, model=mock_model)
+    """Test the evaluate method of LMEvaluator."""
+    evaluator = LMEvaluator(eval=RESPONSE_CORRECTNESS_BINARY, model=mock_model)
     eval_input = EvalInput(
         inputs=[{"query": "Test query"}, {"reference_answer": "Test reference"}],
         output={"response": "Test response"},
     )
-    result = judge.evaluate(eval_input)
+    result = evaluator.evaluate(eval_input)
     assert isinstance(result, EvalOutput)
     assert result.feedback == "Test feedback"
     assert result.score == 1
 
 
 def test_flow_eval_batch_evaluate(mock_model):
-    """Test the batch_evaluate method of Evaluator."""
-    judge = Evaluator(metric=RESPONSE_CORRECTNESS_BINARY, model=mock_model)
+    """Test the batch_evaluate method of LMEvaluator."""
+    evaluator = LMEvaluator(eval=RESPONSE_CORRECTNESS_BINARY, model=mock_model)
     eval_inputs = [
         EvalInput(
             inputs=[{"query": "Test query 1"}, {"reference_answer": "Test reference 1"}],
@@ -80,7 +81,7 @@ def test_flow_eval_batch_evaluate(mock_model):
             output={"response": "Test response 2"},
         ),
     ]
-    results = judge.batch_evaluate(eval_inputs, save_results=False)
+    results = evaluator.batch_evaluate(eval_inputs, save_results=False)
     assert len(results) == 2
     for result in results:
         assert isinstance(result, EvalOutput)
@@ -90,55 +91,55 @@ def test_flow_eval_batch_evaluate(mock_model):
 
 @pytest.mark.parametrize("save_results", [True, False])
 def test_flow_eval_evaluate_save_results(mock_model, tmp_path, save_results):
-    """Test saving results in the evaluate method."""
-    judge = Evaluator(
-        metric=RESPONSE_CORRECTNESS_BINARY, model=mock_model, output_dir=str(tmp_path)
+    """Test saving results in the batch_evaluate method."""
+    evaluator = LMEvaluator(
+        eval=RESPONSE_CORRECTNESS_BINARY, model=mock_model, output_dir=str(tmp_path)
     )
     eval_input = EvalInput(
         inputs=[{"query": "Test query"}, {"reference_answer": "Test reference"}],
         output={"response": "Test response"},
     )
-    with patch("flow_eval.flow_eval.write_results_to_disk") as mock_write:
-        judge.evaluate(eval_input, save_results=save_results)
+    with patch.object(LMEvaluator, "_save_results") as mock_save:
+        evaluator.batch_evaluate([eval_input], save_results=save_results)
         if save_results:
-            mock_write.assert_called_once()
+            mock_save.assert_called_once()
         else:
-            mock_write.assert_not_called()
+            mock_save.assert_not_called()
 
 
 def test_custom_metric():
     """Test creating and using a custom metric."""
-    custom_metric = CustomMetric(
+    custom_metric = LMEval(
         name="custom_metric",
         criteria="Custom criteria",
         rubric=[RubricItem(score=0, description="Bad"), RubricItem(score=1, description="Good")],
-        required_inputs=["custom_input"],
-        required_output="custom_output",
+        input_columns=["custom_input"],
+        output_column="custom_output",
     )
     assert custom_metric.name == "custom_metric"
     assert custom_metric.criteria == "Custom criteria"
     assert len(custom_metric.rubric) == 2
-    assert custom_metric.required_inputs == ["custom_input"]
-    assert custom_metric.required_output == "custom_output"
+    assert custom_metric.input_columns == ["custom_input"]
+    assert custom_metric.output_column == "custom_output"
 
 
 def test_eval_input_validation(mock_model):
     """Test EvalInput validation."""
-    judge = Evaluator(metric=RESPONSE_CORRECTNESS_BINARY, model=mock_model)
+    evaluator = LMEvaluator(eval=RESPONSE_CORRECTNESS_BINARY, model=mock_model)
 
     # Valid input
     valid_input = EvalInput(
         inputs=[{"query": "Test query"}, {"reference_answer": "Test reference"}],
         output={"response": "Test response"},
     )
-    assert judge.evaluate(valid_input)
+    assert evaluator.evaluate(valid_input)
 
     # Invalid input - missing required input
     invalid_input = EvalInput(
         inputs=[{"query": "Test query"}], output={"response": "Test response"}
     )
     with pytest.raises(ValueError):
-        judge.evaluate(invalid_input)
+        evaluator.evaluate(invalid_input)
 
     # Invalid input - wrong output key
     invalid_output = EvalInput(
@@ -146,7 +147,7 @@ def test_eval_input_validation(mock_model):
         output={"wrong_key": "Test response"},
     )
     with pytest.raises(ValueError):
-        judge.evaluate(invalid_output)
+        evaluator.evaluate(invalid_output)
 
 
 def test_format_vars():
@@ -172,14 +173,14 @@ def test_format_rubric():
 
 
 def test_format_prompt(mock_model):
-    """Test Evaluator._format_prompt."""
+    """Test LMEvaluator._format_prompt."""
     eval_input = EvalInput(
         inputs=[{"query": "Test query"}, {"reference_answer": "Test reference"}],
         output={"response": "Test response"},
     )
 
-    judge = Evaluator(metric=RESPONSE_CORRECTNESS_BINARY, model=mock_model)
-    prompt = judge._format_prompt(eval_input)
+    evaluator = LMEvaluator(eval=RESPONSE_CORRECTNESS_BINARY, model=mock_model)
+    prompt = evaluator._format_prompt(eval_input)
 
     expected_prompt = USER_PROMPT_TEMPLATE.format(
         INPUTS=format_vars(eval_input.inputs),

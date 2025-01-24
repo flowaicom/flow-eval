@@ -5,7 +5,7 @@ from unittest.mock import patch
 
 import pytest
 
-from flow_eval.models.adapters.baseten.validation import (
+from flow_eval.lm.models.adapters.baseten.validation import (
     TIMESTAMP_TOLERANCE_SECONDS,
     validate_baseten_signature,
 )
@@ -39,7 +39,7 @@ class TestValidateBasetenSignature:
     def test_valid_signature(self):
         """Test for a valid Baseten signature."""
         with patch(
-            "flow_eval.models.adapters.baseten.validation.AsyncPredictResult"
+            "flow_eval.lm.models.adapters.baseten.validation.AsyncPredictResult"
         ) as mock_async_predict_result:
             mock_async_predict_result_instance = mock_async_predict_result.return_value
             mock_async_predict_result_instance.model_dump_json.return_value = "mock_model_dump_json"
@@ -62,7 +62,7 @@ class TestValidateBasetenSignature:
     def test_invalid_signature(self):
         """Test for an invalid Baseten signature."""
         with patch(
-            "flow_eval.models.adapters.baseten.validation.AsyncPredictResult"
+            "flow_eval.lm.models.adapters.baseten.validation.AsyncPredictResult"
         ) as mock_async_predict_result:
             mock_async_predict_result_instance = mock_async_predict_result.return_value
             mock_async_predict_result_instance.model_dump_json.return_value = "mock_model_dump_json"
@@ -85,7 +85,7 @@ class TestValidateBasetenSignature:
         )
 
         with patch(
-            "flow_eval.models.adapters.baseten.validation.AsyncPredictResult"
+            "flow_eval.lm.models.adapters.baseten.validation.AsyncPredictResult"
         ) as mock_async_predict_result:
             mock_async_predict_result_instance = mock_async_predict_result.return_value
             mock_async_predict_result_instance.model_dump_json.return_value = "mock_model_dump_json"
@@ -111,7 +111,7 @@ class TestValidateBasetenSignature:
         monkeypatch.delenv("BASETEN_WEBHOOK_SECRET", raising=False)
 
         with patch(
-            "flow_eval.models.adapters.baseten.validation.AsyncPredictResult"
+            "flow_eval.lm.models.adapters.baseten.validation.AsyncPredictResult"
         ) as mock_async_predict_result:
             mock_async_predict_result_instance = mock_async_predict_result.return_value
             mock_async_predict_result_instance.model_dump_json.return_value = "mock_model_dump_json"
