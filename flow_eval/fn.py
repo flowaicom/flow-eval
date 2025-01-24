@@ -96,7 +96,11 @@ class FunctionEvaluator(BaseEvaluator):
 
             if save_results:
                 self._save_results(
-                    [eval_input], [eval_output], {"function": self.fn.__name__}, self.fn.__name__
+                    [eval_input],
+                    [eval_output],
+                    metadata={"model_id": f"function-{self.fn.__name__}", "model_type": "function"},
+                    eval_name=self.fn.__name__,
+                    append=False,
                 )
 
             return eval_output
