@@ -34,9 +34,16 @@ class AnswerSimilarityEvaluator(BaseEvaluator):
         self.model_type = model_type
         self.eval_name = eval_name
         self.similarity_fn_name = getattr(SimilarityFunction, similarity_fn_name.upper())
-        self.model = SentenceTransformer(
-            self.model_name, similarity_fn_name=self.similarity_fn_name
-        )
+        self._model = None
+
+    @property
+    def model(self) -> SentenceTransformer:
+        """Lazy initialization of the model."""
+        if self._model is None:
+            self._model = SentenceTransformer(
+                self.model_name, similarity_fn_name=self.similarity_fn_name
+            )
+        return self._model
 
     def _compute_similarity(self, text1: str, text2: str) -> float:
         """Compute similarity between two texts using sentence-transformers similarity function."""
@@ -84,7 +91,7 @@ class AnswerSimilarityEvaluator(BaseEvaluator):
             eval_outputs,
             {
                 "model_id": self.model_name,
-                "model_type": "sentence-transformer",
+                "model_type": self.model_type,
                 "similarity_fn_name": self.similarity_fn_name,
             },
             self.eval_name,
