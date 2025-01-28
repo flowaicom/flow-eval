@@ -45,10 +45,29 @@ class AnswerSimilarityEvaluator(BaseEvaluator):
             )
         return self._model
 
+    def _check_text_lengths(self, text1: str, text2: str) -> None:
+        """Check if texts length exceeds model's maximum sequence length."""
+        max_length = self.model.get_max_seq_length()
+
+        for text, source in [(text1, "output"), (text2, "expected_output")]:
+            # Use encode to get the token count with special tokens
+            tokens = self.model.tokenizer.encode(text)
+            tokenized_length = len(tokens)
+
+            if tokenized_length > max_length:
+                logger.warning(
+                    f"{source} length ({tokenized_length} tokens) exceeds model's "
+                    f"maximum sequence length ({max_length} tokens). Text will be truncated. "
+                    "Consider using a model with longer sequence length for better results. "
+                    "See available models at: https://www.sbert.net/docs/pretrained_models.html"
+                )
+
     def _compute_similarity(self, text1: str, text2: str) -> float:
         """Compute similarity between two texts using sentence-transformers similarity function."""
-        # Use sentence-transformers built-in similarity function
-        # (will handle normalization internally if needed for the chosen similarity function)
+        # Check text lengths
+        self._check_text_lengths(text1, text2)
+
+        # Convert texts to embeddings
         emb1 = self.model.encode(text1)
         emb2 = self.model.encode(text2)
 
