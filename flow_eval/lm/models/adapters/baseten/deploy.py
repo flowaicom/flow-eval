@@ -3,9 +3,14 @@ import os
 from typing import TypedDict
 
 import requests
-import truss
-from truss.api.definitions import ModelDeployment
-from truss.remote.baseten.error import ApiError
+try:
+    import truss
+    from truss.api.definitions import ModelDeployment
+    from truss.remote.baseten.error import ApiError
+except ImportError:
+    truss = None
+    ModelDeployment = None
+    ApiError = None
 
 from flow_eval.lm.models.adapters.baseten.management import sync_set_scale_down
 

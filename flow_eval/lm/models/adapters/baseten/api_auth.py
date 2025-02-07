@@ -4,8 +4,12 @@ import logging
 import os
 
 import requests
-import truss
-from truss.remote import remote_factory
+try:
+    import truss
+    from truss.remote import remote_factory
+except ImportError:
+    truss = None
+    remote_factory = None
 
 from .util import is_interactive
 

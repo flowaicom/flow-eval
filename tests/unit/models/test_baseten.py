@@ -7,6 +7,10 @@ from typing import Any
 from unittest.mock import patch
 
 import pytest
+try:
+    import truss
+except ImportError:
+    pytest.skip("Skipping Baseten tests because `truss` is not installed", allow_module_level=True)
 from hypothesis import given
 from hypothesis import strategies as st
 from pytest import LogCaptureFixture, MonkeyPatch
