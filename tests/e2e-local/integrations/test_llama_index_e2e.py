@@ -10,9 +10,9 @@ import pytest
 from llama_index.core import VectorStoreIndex
 from llama_index.core.llama_dataset import download_llama_dataset
 
-from flow_eval.integrations.llama_index import LlamaIndexFlowJudge
-from flow_eval.metrics import CustomMetric, RubricItem
-from flow_eval.models import Vllm
+from flow_eval.integrations.llama_index import LlamaIndexLMEvaluator
+from flow_eval.lm.models import Vllm
+from flow_eval.lm.types import LMEval, RubricItem
 
 pytest_plugins = ("pytest_asyncio",)
 
@@ -164,10 +164,10 @@ def contexts():
 
 @pytest.fixture
 def correctness_metric():
-    """Creates a CustomMetric for evaluating the correctness of generated answers.
+    """Creates a LMEval for evaluating the correctness of generated answers.
 
     Returns:
-        CustomMetric: A metric object with evaluation criteria and rubric for assessing
+        LMEval: A metric object with evaluation criteria and rubric for assessing
             answer correctness.
     """
     evaluation_criteria = "Is the generated answer relevant to the user query and reference answer?"
@@ -198,12 +198,12 @@ def correctness_metric():
             "fully correct according to the reference answer.",
         ),
     ]
-    return CustomMetric(
+    return LMEval(
         name="correctness",
         criteria=evaluation_criteria,
         rubric=rubric,
-        required_inputs=["query", "reference"],
-        required_output="response",
+        input_columns=["query", "reference"],
+        output_column="response",
     )
 
 
@@ -211,10 +211,10 @@ def correctness_metric():
 async def test_correctness_evaluation(
     correctness_metric, query, reference, response, test_cache_dir
 ):
-    """Tests the correctness evaluation of a generated response using LlamaIndexFlowJudge.
+    """Tests the correctness using LlamaIndexLMEvaluator.
 
     Args:
-        correctness_metric (CustomMetric): The metric used for evaluation.
+        correctness_metric (LMEval): The metric used for evaluation.
         query (str): The input query.
         reference (str): The reference answer.
         response (str): The generated response to evaluate.
@@ -231,8 +231,8 @@ async def test_correctness_evaluation(
         quantized=True,
         download_dir=str(test_cache_dir),
     )
-    flow_eval_evaluator = LlamaIndexFlowJudge(
-        model=model, metric=correctness_metric, save_results=True
+    flow_eval_evaluator = LlamaIndexLMEvaluator(
+        model=model, eval=correctness_metric, save_results=True
     )
     result = await flow_eval_evaluator.aevaluate(
         query=query, reference=reference, response=response
@@ -283,7 +283,7 @@ def compare_distributions(
 
 @pytest.mark.asyncio
 async def test_batch_evaluation(correctness_metric, query, reference, response, test_cache_dir):
-    """Performs a batch evaluation of queries using LlamaIndexFlowJudge and analyzes results."""
+    """Performs a batch evaluation using LlamaIndexLMEvaluator."""
     os.environ["HF_HOME"] = str(test_cache_dir)
     model = None
     flow_eval_correctness = None
@@ -300,14 +300,14 @@ async def test_batch_evaluation(correctness_metric, query, reference, response, 
         )
         logging.info("Vllm model initialized")
 
-        logging.info("Initializing LlamaIndexFlowJudge")
-        flow_eval_correctness = LlamaIndexFlowJudge(
+        logging.info("Initializing LlamaIndexLMEvaluator")
+        flow_eval_correctness = LlamaIndexLMEvaluator(
             model=model,
-            metric=correctness_metric,
+            eval=correctness_metric,
             output_dir=str(test_cache_dir),
             save_results=True,
         )
-        logging.info("LlamaIndexFlowJudge initialized")
+        logging.info("LlamaIndexLMEvaluator initialized")
 
         logging.info("Downloading and preparing dataset")
         rag_dataset, documents = await asyncio.to_thread(

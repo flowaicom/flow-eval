@@ -4,7 +4,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from flow_eval.models.llamafile import cleanup_llamafile
+from flow_eval.lm.models.llamafile import cleanup_llamafile
 
 """
 Test suite for the cleanup_llamafile function.

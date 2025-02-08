@@ -12,7 +12,7 @@ from openai import (
     UnprocessableEntityError,
 )
 
-from flow_eval.models.adapters.openai.adapter import AsyncOpenAIAdapter, OpenAIAdapter
+from flow_eval.lm.models.adapters.openai.adapter import AsyncOpenAIAdapter, OpenAIAdapter
 
 
 @pytest.fixture
@@ -89,7 +89,7 @@ def test_make_request(mock_openai: Mock, openai_api_adapter: OpenAIAdapter) -> N
     assert result is None
 
 
-@patch("flow_eval.models.adapters.openai.adapter.OpenAIAdapter._make_request")
+@patch("flow_eval.lm.models.adapters.openai.adapter.OpenAIAdapter._make_request")
 def test_fetch_response(mock_make_request: Mock, openai_api_adapter: OpenAIAdapter) -> None:
     """Test case to ensure the _fetch_response method works as expected.
 
@@ -198,7 +198,7 @@ async def test_async_make_request(
         await async_openai_api_adapter._make_request(request_messages)
 
 
-@patch("flow_eval.models.adapters.openai.adapter.AsyncOpenAIAdapter._make_request")
+@patch("flow_eval.lm.models.adapters.openai.adapter.AsyncOpenAIAdapter._make_request")
 async def test_async_fetch_response(
     mock_make_request: AsyncMock, async_openai_api_adapter: AsyncOpenAIAdapter
 ) -> None:
@@ -219,7 +219,7 @@ async def test_async_fetch_response(
     assert result == "Hello, world!"
 
 
-@patch("flow_eval.models.adapters.openai.adapter.AsyncOpenAIAdapter._make_request")
+@patch("flow_eval.lm.models.adapters.openai.adapter.AsyncOpenAIAdapter._make_request")
 async def test_async_fetch_batched_response(
     mock_make_request: Mock, async_openai_api_adapter: AsyncOpenAIAdapter
 ) -> None:

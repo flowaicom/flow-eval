@@ -7,8 +7,8 @@ from hypothesis import given
 from hypothesis import strategies as st
 from pytest import LogCaptureFixture, MonkeyPatch
 
-from flow_eval.models.common import ModelType, OpenAIGenerationParams
-from flow_eval.models.openai import OpenAIModel, OpenAIModelConfig, OpenAIModelError
+from flow_eval.lm.models.common import ModelType, OpenAIGenerationParams
+from flow_eval.lm.models.openai import OpenAIModel, OpenAIModelConfig, OpenAIModelError
 
 
 @pytest.fixture

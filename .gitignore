@@ -47,9 +47,7 @@ output/
 data/
 
 .cache
-
-flake.nix
-flake.lock
 .direnv
 
 .hypothesis
+result
