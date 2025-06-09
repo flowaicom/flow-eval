@@ -3,18 +3,27 @@ import os
 import warnings
 from typing import Any
 
+from tqdm import tqdm
+
 from .common import BaseEvaluatorModel, GenerationParams, ModelConfig, ModelType
 
-try:
-    import torch
-    from huggingface_hub import snapshot_download
-    from transformers import AutoModelForCausalLM, AutoTokenizer
 
-    HF_AVAILABLE = True
-except ImportError:
-    HF_AVAILABLE = False
+def _check_hf_availability():
+    """Check if HuggingFace dependencies are available without importing them."""
+    try:
+        import importlib.util
 
-from tqdm import tqdm
+        return (
+            importlib.util.find_spec("torch") is not None
+            and importlib.util.find_spec("huggingface_hub") is not None
+            and importlib.util.find_spec("transformers") is not None
+        )
+    except ImportError:
+        return False
+
+
+# Only check availability when specifically requested
+HF_AVAILABLE = None
 
 logger = logging.getLogger(__name__)
 
@@ -67,13 +76,18 @@ class Hf(BaseEvaluatorModel):
             - _model_id: Identifier for the model. If None, uses the default model.
             // ... other kwargs ...
         """
-        if not HF_AVAILABLE:
+        if not _check_hf_availability():
             raise HfError(
                 status_code=1,
                 message="The required Hugging Face packages are not installed. "
                 "Please install them by adding 'hf' to your extras:\n"
                 "pip install flow-judge[hf]",
             )
+
+        # Import heavy dependencies only when actually needed
+        import torch
+        from huggingface_hub import snapshot_download
+        from transformers import AutoModelForCausalLM, AutoTokenizer
 
         model_id = kwargs.pop("_model_id", self._DEFAULT_MODEL_ID)
 
@@ -147,6 +161,8 @@ class Hf(BaseEvaluatorModel):
         :param prompts: List of input prompts to be processed.
         :return: The determined optimal batch size.
         """
+        import torch  # torch is available since this is called after __init__
+
         if self.device == "cpu":
             return 1  # Default to 1 for CPU
 

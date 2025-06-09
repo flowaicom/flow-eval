@@ -11,14 +11,23 @@ from .common import (
     VllmGenerationParams,
 )
 
-try:
-    import torch
-    from transformers import AutoTokenizer
-    from vllm import LLM, AsyncEngineArgs, AsyncLLMEngine, SamplingParams
 
-    VLLM_AVAILABLE = True
-except ImportError:
-    VLLM_AVAILABLE = False
+def _check_vllm_availability():
+    """Check if vLLM dependencies are available without importing them."""
+    try:
+        import importlib.util
+
+        return (
+            importlib.util.find_spec("torch") is not None
+            and importlib.util.find_spec("transformers") is not None
+            and importlib.util.find_spec("vllm") is not None
+        )
+    except ImportError:
+        return False
+
+
+# Only check availability when specifically requested
+VLLM_AVAILABLE = None
 
 
 class VllmConfig(ModelConfig):
@@ -126,7 +135,7 @@ class Vllm(BaseEvaluatorModel, AsyncBaseEvaluatorModel):
 
         :raises VllmError: If the 'vllm' package is not installed or initialization fails.
         """
-        if not VLLM_AVAILABLE:
+        if not _check_vllm_availability():
             raise VllmError(
                 status_code=1,
                 message=(
@@ -135,6 +144,11 @@ class Vllm(BaseEvaluatorModel, AsyncBaseEvaluatorModel):
                     "pip install flow-eval[vllm]"
                 ),
             )
+
+        # Import heavy dependencies only when actually needed
+        import torch
+        from transformers import AutoTokenizer
+        from vllm import LLM, AsyncEngineArgs, AsyncLLMEngine
 
         model_id = kwargs.pop("_model_id", self._DEFAULT_MODEL_ID)
 
@@ -217,6 +231,8 @@ class Vllm(BaseEvaluatorModel, AsyncBaseEvaluatorModel):
 
     def _generate(self, prompt: str) -> str:
         """Generate a response using the Evaluator vLLM model."""
+        from vllm import SamplingParams
+
         if self.exec_async:
             return asyncio.run(self._async_generate(prompt))
 
@@ -229,6 +245,8 @@ class Vllm(BaseEvaluatorModel, AsyncBaseEvaluatorModel):
         self, prompts: list[str], use_tqdm: bool = True, **kwargs: Any
     ) -> list[str]:
         """Generate responses for multiple prompts using the Evaluator vLLM model."""
+        from vllm import SamplingParams
+
         if self.exec_async:
             return asyncio.run(self._async_batch_generate(prompts, use_tqdm, **kwargs))
 
@@ -245,6 +263,8 @@ class Vllm(BaseEvaluatorModel, AsyncBaseEvaluatorModel):
 
     async def _async_generate(self, prompt: str) -> str:
         """Internal method for async generation."""
+        from vllm import SamplingParams
+
         conversation = [{"role": "user", "content": prompt.strip()}]
         prompt = self.tokenizer.apply_chat_template(
             conversation, add_generation_prompt=True, tokenize=False
@@ -264,6 +284,8 @@ class Vllm(BaseEvaluatorModel, AsyncBaseEvaluatorModel):
         self, prompts: list[str], use_tqdm: bool = True, **kwargs: Any
     ) -> list[str]:
         """Internal method for async batch generation."""
+        from vllm import SamplingParams
+
         conversations = [[{"role": "user", "content": prompt.strip()}] for prompt in prompts]
         formatted_prompts = [
             self.tokenizer.apply_chat_template(conv, add_generation_prompt=True, tokenize=False)

@@ -1,10 +1,10 @@
 import logging
-from typing import Literal
-
-import torch
-from sentence_transformers import SentenceTransformer, SimilarityFunction
+from typing import TYPE_CHECKING, Literal, Optional
 
 from flow_eval.core import BaseEvaluator, EvalInput, EvalOutput
+
+if TYPE_CHECKING:
+    from sentence_transformers import SentenceTransformer
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -36,13 +36,37 @@ class AnswerSimilarityEvaluator(BaseEvaluator):
         self.model_name = model_name
         self.model_type = model_type
         self.eval_name = eval_name
-        self.similarity_fn_name = getattr(SimilarityFunction, similarity_fn_name.upper())
-        self._model = None
+        self.similarity_fn_name_str = similarity_fn_name
+        self._model: Optional["SentenceTransformer"] = None
+        self._similarity_fn = None
 
     @property
-    def model(self) -> SentenceTransformer:
+    def similarity_fn_name(self):
+        """Lazy initialization of similarity function."""
+        if self._similarity_fn is None:
+            try:
+                from sentence_transformers import SimilarityFunction
+            except ImportError as e:
+                raise ImportError(
+                    "sentence-transformers is required for AnswerSimilarityEvaluator. "
+                    "Install it with: pip install flow-eval[similarity]"
+                ) from e
+            self._similarity_fn = getattr(SimilarityFunction, self.similarity_fn_name_str.upper())
+        return self._similarity_fn
+
+    @property
+    def model(self) -> "SentenceTransformer":
         """Lazy initialization of the model."""
         if self._model is None:
+            try:
+                import torch
+                from sentence_transformers import SentenceTransformer
+            except ImportError as e:
+                raise ImportError(
+                    "torch and sentence-transformers are required for AnswerSimilarityEvaluator. "
+                    "Install them with: pip install flow-eval[similarity]"
+                ) from e
+
             device = "cuda" if torch.cuda.is_available() else "cpu"
             self._model = SentenceTransformer(
                 self.model_name, similarity_fn_name=self.similarity_fn_name, device=device
@@ -140,6 +164,9 @@ class AnswerSimilarityEvaluator(BaseEvaluator):
         save_results: bool = True,
     ) -> list[EvalOutput]:
         """Batch evaluate a list of EvalInput objects."""
+        if not eval_inputs:
+            raise ValueError("Input list cannot be empty")
+
         try:
             # Extract all texts to compare and convert tuples to lists
             outputs, expected_outputs = map(

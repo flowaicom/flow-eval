@@ -4,6 +4,7 @@ import logging
 import os
 
 import requests
+
 try:
     import truss
     from truss.remote import remote_factory

@@ -32,7 +32,7 @@
 <a href="https://app.fossa.com/projects/git%2Bgithub.com%2Fflowaicom%2Fflow-eval?ref=badge_shield" alt="FOSSA Status"><img src="https://app.fossa.com/api/projects/git%2Bgithub.com%2Fflowaicom%2Fflow-eval.svg?type=shield"/></a>
 </p>
 
-`flow-eval` is an evaluation library for LLM applications that support LLM-as-a-judge, functions and similarity-based evaluation. It provides flexible evals, multiple inference backends, and seamless integration with popular frameworks.
+`flow-eval` is an evaluation library for LLM applications that supports LLM-as-a-judge, function-based, and similarity-based evaluation. It provides flexible evals, multiple inference backends, and seamless integration with popular frameworks.
 
 ## Installation
 
@@ -49,6 +49,8 @@ Extras available:
 - `vllm` to install vLLM dependencies
 - `llamafile` to install Llamafile dependencies
 - `baseten` to install Baseten dependencies
+- `similarity` to install similarity evaluation dependencies (torch, sentence-transformers)
+- `openai` to install OpenAI API dependencies
 
 ## Quick Start
 
@@ -160,6 +162,22 @@ The library supports multiple inference backends to accommodate different hardwa
   ```
   For detailed information on using Baseten, visit the [Baseten readme](https://github.com/flowaicom/flow-eval/blob/feat/baseten-integration/flow_eval/models/adapters/baseten/README.md).
 
+5. **OpenAI**:
+    - Uses OpenAI's API for remote evaluation
+    - Supports various OpenAI models including GPT-4
+    - Requires OPENAI_API_KEY environment variable
+
+  ```python
+  from flow_eval.lm.models import OpenAIModel
+  import os
+
+  # Set your API key
+  os.environ["OPENAI_API_KEY"] = "your-api-key-here"
+
+  model = OpenAIModel(model="gpt-4")
+  ```
+  Install with: `pip install flow-eval[openai]`
+
 Choose the inference backend that best matches your hardware and performance requirements. The library provides a unified interface for all these options, making it easy to switch between them as needed.
 
 
@@ -224,6 +242,56 @@ for i, result in enumerate(results):
     display(Markdown(f"__Sample {i+1}:__"))
     display(Markdown(f"__Feedback:__\n{result.feedback}\n\n__Score:__\n{result.score}"))
     display(Markdown("---"))
+```
+
+### Similarity-Based Evaluation
+
+For evaluating semantic similarity between responses and expected outputs, you can use the `AnswerSimilarityEvaluator`:
+
+```python
+from flow_eval import AnswerSimilarityEvaluator
+from flow_eval.core import EvalInput
+
+# Initialize the similarity evaluator
+similarity_evaluator = AnswerSimilarityEvaluator(
+    model_name="all-mpnet-base-v2",  # Sentence transformer model
+    similarity_fn_name="cosine",      # cosine, dot, euclidean, or manhattan
+    output_dir=None                   # Set to save results
+)
+
+# Create evaluation input with expected output
+eval_input = EvalInput(
+    inputs=[],
+    output={"response": "The quick brown fox jumps over the lazy dog"},
+    expected_output={"reference": "A fast brown fox leaps above a sleeping canine"}
+)
+
+# Run similarity evaluation
+result = similarity_evaluator.evaluate(eval_input, save_results=False)
+print(f"Similarity score: {result.score:.3f}")  # Range: 0.0 to 1.0
+
+# Batch evaluation
+eval_inputs = [
+    EvalInput(
+        inputs=[],
+        output={"response": "Hello world"},
+        expected_output={"reference": "Hi world"}
+    ),
+    EvalInput(
+        inputs=[],
+        output={"response": "Python programming"},
+        expected_output={"reference": "Python coding"}
+    )
+]
+
+results = similarity_evaluator.batch_evaluate(eval_inputs, save_results=False)
+for i, result in enumerate(results):
+    print(f"Sample {i+1} similarity: {result.score:.3f}")
+```
+
+The similarity evaluator requires the `similarity` extra:
+```bash
+pip install flow-eval[similarity]
 ```
 
 ## Advanced Usage
@@ -342,15 +410,23 @@ To run the tests for Flow-eval, follow these steps:
 
    This will discover and run all the tests in the `tests/` directory.
 
-3. If you want to run a specific test file, you can do so by specifying the file path:
+3. Run different test categories:
    ```bash
-   pytest tests/test_flow_eval.py
+   pytest tests/unit/              # Unit tests only
+   pytest tests/e2e-local/         # Local end-to-end tests
+   pytest tests/e2e-cloud-gpu/     # Cloud GPU tests (requires GPU)
    ```
 
-4. For more verbose output, you can use the `-v` flag:
+4. Run tests with coverage:
+   ```bash
+   pytest tests/unit --cov=./
+   ```
+
+5. For more verbose output, you can use the `-v` flag:
    ```bash
    pytest -v tests/
    ```
+
 ## Contributing
 
 Contributions to `flow-eval` are welcome! Please follow these steps:

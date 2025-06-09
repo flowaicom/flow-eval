@@ -51,7 +51,7 @@ class FunctionEvaluator(BaseEvaluator):
         for param in param_names:
             if param not in type_hints:
                 raise ValueError(f"Parameter '{param}' must have a type annotation")
-            if type_hints[param] != str:
+            if type_hints[param] is not str:
                 raise ValueError(
                     f"Parameter '{param}' must be annotated as str, got" f" {type_hints[param]}"
                 )

@@ -22,12 +22,19 @@ from .common import (
     ModelType,
 )
 
-try:
-    from openai import AsyncOpenAI, OpenAI
 
-    LLAMAFILE_AVAILABLE = True
-except ImportError:
-    LLAMAFILE_AVAILABLE = False
+def _check_llamafile_availability():
+    """Check if Llamafile dependencies are available without importing them."""
+    try:
+        import importlib.util
+
+        return importlib.util.find_spec("openai") is not None
+    except ImportError:
+        return False
+
+
+# Only check availability when specifically requested
+LLAMAFILE_AVAILABLE = None
 
 LLAMAFILE_URL = (
     "https://huggingface.co/flowaicom/Flow-Judge-v0.1-Llamafile/resolve/main/"
@@ -175,13 +182,16 @@ class Llamafile(BaseEvaluatorModel, AsyncBaseEvaluatorModel):
         :raises LlamafileError: If required Llamafile packages are not installed or
             initialization fails.
         """
-        if not LLAMAFILE_AVAILABLE:
+        if not _check_llamafile_availability():
             raise LlamafileError(
                 status_code=1,
                 message="The required Llamafile packages are not installed. "
                 "Please install them by adding 'llamafile' to your extras:\n"
                 "pip install flow-eval[llamafile]",
             )
+
+        # Import dependencies only when actually needed
+        from openai import AsyncOpenAI, OpenAI
 
         # Allow internal override of model_id for debugging/development
         model_id = kwargs.pop("_model_id", None) or self._DEFAULT_MODEL_ID
