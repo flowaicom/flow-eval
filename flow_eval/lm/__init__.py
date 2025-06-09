@@ -1,69 +1,70 @@
 """Language Model evaluation module."""
 
+import importlib
+import sys
+from typing import TYPE_CHECKING, Any, List, Type
+
 from flow_eval.lm.metrics import list_all_lm_evals
 from flow_eval.lm.models.common import AsyncBaseEvaluatorModel, BaseEvaluatorModel
 from flow_eval.lm.types import LMEval, RubricItem
 
+# Base exports that are always available
 __all__ = [
     "AsyncBaseEvaluatorModel",
     "BaseEvaluatorModel",
     "LMEval",
     "RubricItem",
+    "list_all_available_models",
 ]
 
-# Conditional imports for optional model implementations
-try:
-    from flow_eval.lm.models.huggingface import Hf
+# Add metric names to __all__
+__all__ += list_all_lm_evals()
 
-    __all__.append("Hf")
-except ImportError:
-    Hf = None
-
-try:
-    from flow_eval.lm.models.vllm import Vllm
-
-    __all__.append("Vllm")
-except ImportError:
-    Vllm = None
-
-try:
-    from flow_eval.lm.models.llamafile import Llamafile
-
-    __all__.append("Llamafile")
-except ImportError:
-    Llamafile = None
-
-try:
-    from flow_eval.lm.models.baseten import Baseten
-
-    __all__.append("Baseten")
-except ImportError:
-    Baseten = None
-
-try:
-    from flow_eval.lm.models.openai import OpenAIModel
-
-    __all__.append("OpenAIModel")
-except ImportError as e:
-    print(f"Error importing OpenAIModel: {e}")
-    OpenAIModel = None
+# Model names that can be imported (but won't be imported until accessed)
+_AVAILABLE_MODELS = ["Hf", "Vllm", "Llamafile", "Baseten", "OpenAIModel"]
+__all__ += _AVAILABLE_MODELS
 
 
-def list_all_available_models():
-    """Return a list of available model classes based on installed extras."""
+def list_all_available_models() -> list[type[BaseEvaluatorModel]]:
+    """Return a list of available model classes based on installed extras.
+
+    This function now dynamically checks which models can be imported
+    rather than attempting to import them at module level.
+    """
     models = [BaseEvaluatorModel]
-    if Hf is not None:
-        models.append(Hf)
-    if Vllm is not None:
-        models.append(Vllm)
-    if Llamafile is not None:
-        models.append(Llamafile)
-    if Baseten is not None:
-        models.append(Baseten)
-    if OpenAIModel is not None:
-        models.append(OpenAIModel)
+
+    model_mapping = {
+        "Hf": "flow_eval.lm.models.huggingface",
+        "Vllm": "flow_eval.lm.models.vllm",
+        "Llamafile": "flow_eval.lm.models.llamafile",
+        "Baseten": "flow_eval.lm.models.baseten",
+        "OpenAIModel": "flow_eval.lm.models.openai",
+    }
+
+    for model_name, module_path in model_mapping.items():
+        try:
+            module = importlib.import_module(module_path)
+            model_class = getattr(module, model_name)
+            models.append(model_class)
+        except ImportError:
+            # Model not available due to missing dependencies
+            pass
+
     return models
 
 
-__all__ += list_all_lm_evals()
-__all__ += list_all_available_models()
+def __getattr__(name: str) -> Any:
+    """Lazy import models from flow_eval.lm.models."""
+    if name in _AVAILABLE_MODELS:
+        # Delegate to the models subpackage
+        from flow_eval.lm import models
+
+        return getattr(models, name)
+
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
+
+
+# For static type checking and IDE support
+
+if TYPE_CHECKING:
+    from flow_eval.lm.models import Baseten, Hf, Llamafile, OpenAIModel, Vllm

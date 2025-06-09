@@ -3,6 +3,7 @@ import os
 from typing import TypedDict
 
 import requests
+
 try:
     import truss
     from truss.api.definitions import ModelDeployment

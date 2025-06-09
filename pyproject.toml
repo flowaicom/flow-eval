@@ -71,6 +71,10 @@ baseten = [
 openai = [
     "openai>=1.51.0"
 ]
+similarity = [
+    "torch>=2.3.0",
+    "sentence-transformers>=3.0.0"
+]
 
 [project.urls]
 Homepage = "https://github.com/flowaicom"
